@@ -4,14 +4,14 @@ namespace App\View\Components;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
+use PHPUnit\Event\Telemetry\GarbageCollectorStatus;
 
 class AppLayout extends Component
 {
-    /**
-     * Get the view / contents that represents the component.
-     */
-    public function render(): View
+
+    public function render()
     {
+        // Pasa el valor de $menuAbierto a la vista
         return view('layouts.app');
     }
 }

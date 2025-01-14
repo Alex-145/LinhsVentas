@@ -1,0 +1,10 @@
+[90m= [39m[34;4mApp\Models\Client[39;24m {#6540
+    [34mid[39m: [35m1[39m,
+    [34mname[39m: "[32mColton Leannon[39m",
+    [34mdni_ruc[39m: "[32m61633764622[39m",
+    [34mbusiness_name[39m: "[32mRice and Sons[39m",
+    [34mphone_number[39m: "[32m+1.331.393.5125[39m",
+    [34mcreated_at[39m: "[32m2024-12-31 04:17:43[39m",
+    [34mupdated_at[39m: "[32m2024-12-31 04:17:43[39m",
+  }
+
