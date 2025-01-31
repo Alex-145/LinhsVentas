@@ -11,6 +11,7 @@ class NavigationMenudos extends Component
         'inventario' => false,
         'ventas' => false,
         'contactos' => false,
+        'more' => false,
     ];
 
     protected $listeners = ['toggleMenu' => 'updateMenuState'];
@@ -24,6 +25,20 @@ class NavigationMenudos extends Component
         session()->put('menuAbierto', $this->menuAbierto);
         session()->put('dropdowns', $this->dropdowns);
         return redirect()->route($ruta);
+    }
+
+    public function navegarinicio($ruta)
+    {
+        return redirect()->to($ruta);
+    }
+
+    public function navegarsales($ruta)
+    {
+        // Guardar el estado del filtro en la sesión
+        session()->put('isPendienteFacturacion', false);
+
+        // Redirigir a la ruta con los parámetros adicionales
+        return redirect()->route($ruta, ['isPendienteFacturacion' => false]);
     }
 
     public function toggleDropdown($key)

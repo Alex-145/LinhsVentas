@@ -195,98 +195,98 @@ class SalesComponent extends Component
 
     // Método para calcular
     public function calculateTotal()
-{
-    $this->total = 0;
+    {
+        $this->total = 0;
 
-    foreach ($this->products as $id => $product) {
-        $price = (float) ($this->productPrices[$id] ?? $product->sale_price);
-        $quantity = (int) ($this->productQuantities[$id] ?? 0);
+        foreach ($this->products as $id => $product) {
+            $price = (float) ($this->productPrices[$id] ?? $product->sale_price);
+            $quantity = (int) ($this->productQuantities[$id] ?? 0);
 
-        // Asegurar que price y quantity son valores numéricos
-        if ($price && $quantity >= 0) {
-            $this->total += $price * $quantity;
+            // Asegurar que price y quantity son valores numéricos
+            if ($price && $quantity >= 0) {
+                $this->total += $price * $quantity;
+            }
+        }
+
+        foreach ($this->services as $id => $service) {
+            $price = (float) ($this->servicePrices[$id] ?? $service->price);
+            $quantity = (int) ($this->serviceQuantities[$id] ?? 0);
+
+            // Asegurar que price y quantity son valores numéricos
+            if ($price && $quantity >= 0) {
+                $this->total += $price * $quantity;
+            }
         }
     }
 
-    foreach ($this->services as $id => $service) {
-        $price = (float) ($this->servicePrices[$id] ?? $service->price);
-        $quantity = (int) ($this->serviceQuantities[$id] ?? 0);
-
-        // Asegurar que price y quantity son valores numéricos
-        if ($price && $quantity >= 0) {
-            $this->total += $price * $quantity;
-        }
-    }
-}
-
-public function calculateProductUtilidad($product)
-{
-    $quantity = (int) ($this->productQuantities[$product->id] ?? 0);
-    $price = (float) ($this->productPrices[$product->id] ?? 0);
-    $utilidadSaleDetail = 0;
-
-    if ($product instanceof Product) {
-        $purchasePrice = (float) ($product->purchase_price ?? 0);
-
-        // Verificar que price, purchasePrice y quantity son numéricos antes de calcular
-        if ($price && $purchasePrice && $quantity >= 0) {
-            $utilidadSaleDetail = ($price - $purchasePrice) * $quantity;
-        }
-    }
-
-    return $utilidadSaleDetail;
-}
-
-public function calculateServiceUtilidad($service)
-{
-    $quantity = (int) ($this->serviceQuantities[$service->id] ?? 0);
-    $price = (float) ($this->servicePrices[$service->id] ?? 0);
-    $utilidadSaleDetail = 0;
-
-    if ($service instanceof Service) {
-        // Verificar que el precio y la cantidad son numéricos antes de calcular
-        if ($price && $quantity >= 0) {
-            $utilidadSaleDetail = $price * $quantity;
-        }
-    }
-
-    return $utilidadSaleDetail;
-}
-
-public function calculateUtilidadSale()
-{
-    $utilidadSale = 0;
-
-    // Calcular utilidad de productos
-    foreach ($this->products as $product) {
+    public function calculateProductUtilidad($product)
+    {
         $quantity = (int) ($this->productQuantities[$product->id] ?? 0);
         $price = (float) ($this->productPrices[$product->id] ?? 0);
+        $utilidadSaleDetail = 0;
 
         if ($product instanceof Product) {
             $purchasePrice = (float) ($product->purchase_price ?? 0);
 
             // Verificar que price, purchasePrice y quantity son numéricos antes de calcular
             if ($price && $purchasePrice && $quantity >= 0) {
-                $utilidadSale += ($price - $purchasePrice) * $quantity;
+                $utilidadSaleDetail = ($price - $purchasePrice) * $quantity;
             }
         }
+
+        return $utilidadSaleDetail;
     }
 
-    // Calcular utilidad de servicios
-    foreach ($this->services as $service) {
+    public function calculateServiceUtilidad($service)
+    {
         $quantity = (int) ($this->serviceQuantities[$service->id] ?? 0);
         $price = (float) ($this->servicePrices[$service->id] ?? 0);
+        $utilidadSaleDetail = 0;
 
         if ($service instanceof Service) {
-            // Verificar que price y quantity son numéricos antes de calcular
+            // Verificar que el precio y la cantidad son numéricos antes de calcular
             if ($price && $quantity >= 0) {
-                $utilidadSale += $price * $quantity;
+                $utilidadSaleDetail = $price * $quantity;
             }
         }
+
+        return $utilidadSaleDetail;
     }
 
-    return $utilidadSale;
-}
+    public function calculateUtilidadSale()
+    {
+        $utilidadSale = 0;
+
+        // Calcular utilidad de productos
+        foreach ($this->products as $product) {
+            $quantity = (int) ($this->productQuantities[$product->id] ?? 0);
+            $price = (float) ($this->productPrices[$product->id] ?? 0);
+
+            if ($product instanceof Product) {
+                $purchasePrice = (float) ($product->purchase_price ?? 0);
+
+                // Verificar que price, purchasePrice y quantity son numéricos antes de calcular
+                if ($price && $purchasePrice && $quantity >= 0) {
+                    $utilidadSale += ($price - $purchasePrice) * $quantity;
+                }
+            }
+        }
+
+        // Calcular utilidad de servicios
+        foreach ($this->services as $service) {
+            $quantity = (int) ($this->serviceQuantities[$service->id] ?? 0);
+            $price = (float) ($this->servicePrices[$service->id] ?? 0);
+
+            if ($service instanceof Service) {
+                // Verificar que price y quantity son numéricos antes de calcular
+                if ($price && $quantity >= 0) {
+                    $utilidadSale += $price * $quantity;
+                }
+            }
+        }
+
+        return $utilidadSale;
+    }
 
 
 
@@ -313,7 +313,16 @@ public function calculateUtilidadSale()
             $this->showConfirmationModal = true; // Mostrar el modal con el mensaje
             return;
         }
+        // Validar que las cantidades no superen el stock
+        foreach ($this->products as $product) {
+            $quantity = $this->productQuantities[$product->id];
 
+            if ($product instanceof Product && $quantity > $product->stock) {
+                $this->validationMessage = "La cantidad solicitada de {$product->name} supera el stock disponible. Stock actual: {$product->stock}.";
+                $this->showConfirmationModal = true; // Mostrar el modal con el mensaje
+                return;
+            }
+        }
         // Crear la venta
         $sale = Sale::create([
             'client_id' => $this->selectedClient->id,
@@ -365,7 +374,8 @@ public function calculateUtilidadSale()
             ]);
         }
 
-
+        $this->dispatch('saleCreated');
+        $this->dispatch('checkLowStock');
         // Limpiar los campos después de guardar
         $this->reset([
             'products',

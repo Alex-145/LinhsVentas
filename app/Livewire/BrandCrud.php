@@ -3,67 +3,133 @@
 namespace App\Livewire;
 
 use App\Models\Brand;
+use App\Models\Category;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class BrandCrud extends Component
 {
-    public $brands, $name, $brandId;
-    public $isEdit = false;
+    use WithFileUploads;
 
-    protected $rules = [
-        'name' => 'required|string|max:255',
-    ];
-
+    public $name, $category_id, $brandId;
+    public $categories;
+    public $brands = [];
+    public $openForm = false;
+    public $brandToDelete = null;
+    public $openDeleteConfirm = false;
+    public $url_imgbrand, $url_imgbrand_old;
+    public $photoModalOpen = false;
     public $menuAbierto = true;
-
-    protected $listeners = ['toggleMenu' => 'updateMenuState'];
-
     public function updateMenuState()
     {
         $this->menuAbierto = !$this->menuAbierto;
     }
 
+    protected $listeners = ['toggleMenu' => 'updateMenuState'];
+
+    public function mount()
+    {
+        $this->loadBrands();
+    }
+
+    public function loadBrands()
+    {
+        $this->categories = Category::all();
+        $this->brands = Brand::with('category')->get();
+    }
+
     public function render()
     {
-        $this->brands = Brand::all();
         return view('livewire.brand-crud')->layout('layouts.app');
     }
 
-    public function resetInput()
+    public function openPhotoModal($id)
     {
-        $this->name = null;
-        $this->brandId = null;
-        $this->isEdit = false;
+        $brand = Brand::findOrFail($id);
+        $this->brandId = $id;
+        $this->url_imgbrand_old = $brand->url_imgbrand;
+        $this->photoModalOpen = true;
     }
 
-    public function store()
+    public function savePhoto()
     {
-        $this->validate();
-        Brand::create(['name' => $this->name]);
-        session()->flash('message', 'Marca creada con éxito.');
-        $this->resetInput();
+        $this->validate([
+            'url_imgbrand' => 'nullable|image|max:1024',
+        ]);
+
+        $brand = Brand::findOrFail($this->brandId);
+
+        if ($this->url_imgbrand) {
+            $urlImgbrand = $this->url_imgbrand->store('brands', 'public');
+            $brand->update(['url_imgbrand' => $urlImgbrand]);
+        }
+
+        session()->flash('message', 'Foto actualizada correctamente.');
+        $this->photoModalOpen = false;
+        $this->loadBrands();
+    }
+
+    public function save()
+    {
+        $this->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'url_imgbrand' => 'nullable|image|max:1024',
+        ]);
+
+        $urlImgbrand = $this->url_imgbrand ? $this->url_imgbrand->store('brands', 'public') : null;
+
+        if ($this->brandId) {
+            $brand = Brand::find($this->brandId);
+            $brand->update([
+                'name' => $this->name,
+                'category_id' => $this->category_id,
+                'url_imgbrand' => $urlImgbrand ?? $brand->url_imgbrand,
+            ]);
+            session()->flash('message', 'Marca actualizada con éxito.');
+        } else {
+            Brand::create([
+                'name' => $this->name,
+                'category_id' => $this->category_id,
+                'url_imgbrand' => $urlImgbrand,
+            ]);
+            session()->flash('message', 'Marca creada con éxito.');
+        }
+
+        $this->loadBrands();
+        $this->reset(['name', 'category_id', 'brandId', 'url_imgbrand']);
+        $this->openForm = false;
+    }
+
+    public function create()
+    {
+        $this->reset(['name', 'category_id', 'brandId', 'url_imgbrand']);
+        $this->openForm = true;
     }
 
     public function edit($id)
     {
-        $brand = Brand::findOrFail($id);
+        $brand = Brand::find($id);
         $this->brandId = $brand->id;
         $this->name = $brand->name;
-        $this->isEdit = true;
+        $this->category_id = $brand->category_id;
+        $this->openForm = true;
     }
 
-    public function update()
+    public function delete()
     {
-        $this->validate();
-        $brand = Brand::findOrFail($this->brandId);
-        $brand->update(['name' => $this->name]);
-        session()->flash('message', 'Marca actualizada con éxito.');
-        $this->resetInput();
-    }
+        if ($this->brandToDelete) {
+            $brand = Brand::find($this->brandToDelete);
+            if ($brand) {
+                $brand->delete();
+                session()->flash('message', 'Marca eliminada con éxito.');
+            } else {
+                session()->flash('message', 'Marca no encontrada.');
+            }
 
-    public function delete($id)
-    {
-        Brand::findOrFail($id)->delete();
-        session()->flash('message', 'Marca eliminada con éxito.');
+            $this->loadBrands();
+            $this->brandToDelete = null;
+            $this->openDeleteConfirm = false;
+        }
     }
 }

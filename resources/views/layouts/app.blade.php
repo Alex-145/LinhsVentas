@@ -21,7 +21,7 @@
         <!-- Contenedor de la interfaz de usuario -->
         <div class="flex h-screen">
             <!-- Navegación -->
-            <div>
+            <div class="">
                 @livewire('navigation-menudos') <!-- Componente de navegación -->
             </div>
 

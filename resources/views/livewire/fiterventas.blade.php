@@ -18,10 +18,23 @@
             class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
             Filtrar por esta semana
         </button>
-
         <button wire:click="filterThisMonth"
             class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
             Filtrar por este mes
+        </button>
+        <!-- Botón para activar/desactivar el filtro de ventas facturadas -->
+        <button wire:click="$toggle('filterFacturado')"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+            {{ $filterFacturado ? 'Desactivar filtro facturadas' : 'Activar filtro facturadas' }}
+        </button>
+        <!-- Botón para activar/desactivar el filtro pendiente facturación -->
+        <button wire:click="$toggle('filterPendienteFacturacion')"
+            class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+            {{ $filterPendienteFacturacion ? 'Desactivar filtro pendiente facturación' : 'Activar filtro pendiente facturación' }}
+        </button>
+        <button wire:click="$toggle('filterNoAplicable')"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+            {{ $filterNoAplicable ? 'Desactivar filtro no_aplicable' : 'Activar filtro no_aplicable' }}
         </button>
     </div>
 </div>

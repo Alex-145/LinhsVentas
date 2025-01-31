@@ -15,19 +15,23 @@ class Product extends Model
         'purchase_price',
         'sale_price',
         'stock',
-        'category_id',
+        'status',
         'brand_id',
         'photo_url',
     ];
 
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
+
     public function brand()
     {
         return $this->belongsTo(Brand::class);
     }
+
+    public function category()
+    {
+        return $this->brand ? $this->brand->category() : null;
+    }
+
+
     // public function saleDetails()
     // {
     //     return $this->hasMany(SaleDetail::class);

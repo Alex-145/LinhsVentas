@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetail;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\PDF as DomPDFPDF;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -28,6 +30,12 @@ class SalesList extends Component
     public $detailToDelete = null;
     public $showDeleteConfirmationde = false;
     public $selectedClient = null;
+    public $filterFacturado = false; // Por defecto, el filtro está desactivado
+    public $filterPendienteFacturacion = false; // Por defecto, el filtro está desactivado
+    public $filterNoAplicable = false; // Por defecto, el filtro está desactivado
+    public $isPendienteFacturacion = false; // Agregar una propiedad para controlar el filtro
+
+
     protected $listeners = ['toggleMenu' => 'updateMenuState'];
 
     public function confirmDeleteDetail($detailId)
@@ -37,8 +45,15 @@ class SalesList extends Component
     }
     public function mount()
     {
-        $this->loadSales();
+        $this->isPendienteFacturacion = session()->get('isPendienteFacturacion', false);
+
+        if ($this->isPendienteFacturacion) {
+            $this->allfacpendiente();
+        } else {
+            $this->loadSales();
+        }
     }
+
     public function loadSales()
     {
         $query = Sale::with(['client', 'user', 'saleDetails' => function ($query) {
@@ -64,8 +79,49 @@ class SalesList extends Component
             $query->whereBetween('sale_date', [$this->startDate, $this->endDate]);
         }
 
+        // Combinar filtros de 'facturado', 'pendiente de facturación' y 'no aplicable' si están activados
+        $statuses = [];
+        if ($this->filterFacturado) {
+            $statuses[] = 'facturado';
+        }
+        if ($this->filterPendienteFacturacion) {
+            $statuses[] = 'pendiente_facturacion';
+        }
+        if ($this->filterNoAplicable) {
+            $statuses[] = 'no_aplicable';
+        }
+        if (!empty($statuses)) {
+            $query->whereIn('status_fac', $statuses);
+        }
+
         $this->sales = $query->get();
     }
+
+
+    public function allfacpendiente()
+    {
+        $query = Sale::with(['client', 'user', 'saleDetails' => function ($query) {
+            $query->where('estado_detail', '!=', 'anulado_detail'); // Excluir detalles anulados
+        }])
+            ->where('estado_sale', 'habil_sale') // Solo ventas habilitadas
+            ->where('status_fac', 'pendiente_facturacion') // Solo ventas pendientes de facturación
+            ->orderBy('created_at', 'desc');
+
+        // Filtro por búsqueda
+        if ($this->search) {
+            $query->whereHas('client', function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // Sin filtros de fecha, mostramos todas las ventas
+        $this->sales = $query->get();
+
+
+    }
+
+
+
     public function updateMenuState()
     {
         $this->menuAbierto = !$this->menuAbierto;
@@ -267,9 +323,39 @@ class SalesList extends Component
             session()->flash('error', 'No se pudo encontrar la venta.');
         }
     }
+
+
+    // ----pdf----
+
+    public function generateSalePdf($saleId)
+    {
+        $sale = Sale::with(['client', 'saleDetails' => function ($query) {
+            $query->where('estado_detail', '!=', 'anulado_detail'); // Excluir detalles anulados
+        }])->find($saleId);
+
+        if (!$sale) {
+            session()->flash('error', 'No se encontró la venta.');
+            return;
+        }
+
+        // Genera el PDF
+        $pdf = Pdf::loadView('pdf.sale', ['sale' => $sale]);
+
+        // Forzar la descarga del PDF
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream(); // Enviar el PDF como respuesta
+        }, 'name.pdf');
+    }
+
+
     public function render()
     {
-        $this->loadSales();
+        if ($this->isPendienteFacturacion) {
+            $this->allfacpendiente(); // Llamar allfacpendiente si el estado es true
+        } else {
+            $this->loadSales(); // Llamar loadSales si el estado es false
+        }
+
         \Carbon\Carbon::setLocale('es');
         return view('livewire.sales-list', [
             'sales' => $this->sales,

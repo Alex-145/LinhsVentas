@@ -13,36 +13,29 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-        <!-- Livewire Styles -->
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+        </style>
+        <!-- Styles -->
         @livewireStyles
     </head>
     <body>
-        <!-- Contenedor de la interfaz de usuario -->
-        <div class="flex h-screen">
-            <!-- Navegación -->
-            <div>
-                @livewire('navigation-menudos') <!-- Componente de navegación -->
-            </div>
+        <header class="shadow-md fixed top-0 w-full z-50">
+            @livewire('pageweb.header')
+        </header>
 
-            <!-- Contenido principal -->
-            <div class="flex-1 flex flex-col">
-                <!-- Header -->
-                <div class="">
-                    @livewire('header')
-                </div>
+        <main class="pt-16">
+            {{ $slot }}
+        </main>
 
-                <!-- Contenido dinámico (slot) -->
-                <div class="p-4 flex-1">
-                    {{ $slot }}
-                </div>
-            </div>
-        </div>
+        <footer>
+            @livewire('footer')
+        </footer>
 
-        <!-- Modales o componentes adicionales -->
-        @stack('modals')
+        @livewire('pageweb.carrito')
 
-        <!-- Livewire Scripts -->
         @livewireScripts
     </body>
 </html>

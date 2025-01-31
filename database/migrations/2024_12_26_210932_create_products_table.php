@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('photo_url')->nullable();
             $table->integer('stock');
             $table->timestamp('ultima_actualizacion')->useCurrent();
+            $table->enum('status', ['published', 'unpublished'])->default('unpublished');
             $table->foreignId('brand_id')->constrained('brands')->onDelete('cascade');
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->timestamps();
         });
     }

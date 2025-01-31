@@ -1,5 +1,5 @@
 <div
-    class="{{ $menuAbierto ? 'ml-60' : 'ml-16' }} mt-16 max-w-7xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-xl rounded-xl transition-all duration-300 ease-in-out">
+    class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-xl rounded-xl transition-all duration-300 ease-in-out">
     <div class="flex space-x-4">
         <!-- Div de Ganancias Totales -->
         <div class="p-4 mb-4 bg-green-100 rounded-lg shadow-inner flex-1">
@@ -16,11 +16,22 @@
 
     <div class="space-y-4">
         <!-- Botón de filtros -->
-        <div class="flex justify-end">
-            <button wire:click="openModal"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
-                Filtros
-            </button>
+        <div class="flex justify-end space-x-4">
+            @if (!$isPendienteFacturacion)
+    <button wire:click="openModal"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+        Filtros
+    </button>
+@endif
+
+            <a href="https://api-seguridad.sunat.gob.pe/v1/clientessol/4f3b88b3-d9d6-402a-b85d-6a0bc857746a/oauth2/loginMenuSol?lang=es-PE&showDni=true&showLanguages=false&originalUrl=https://e-menu.sunat.gob.pe/cl-ti-itmenu/AutenticaMenuInternet.htm&state=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAADdAAEZXhlY3B0AAZwYXJhbXN0AEsqJiomL2NsLXRpLWl0bWVudS9NZW51SW50ZXJuZXQuaHRtJmI2NGQyNmE4YjVhZjA5MTkyM2IyM2I2NDA3YTFjMWRiNDFlNzMzYTZ0AANleGVweA=="
+                target="_blank"
+                class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md flex items-center space-x-2 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <span>SUNAT</span>
+            </a>
         </div>
 
         <!-- Modal de filtros -->
@@ -84,47 +95,36 @@
                                         <button wire:click="confirmStatusChange({{ $sale->id }}, 'facturado')"
                                             class="text-indigo-600 hover:text-indigo-900 transition-colors duration-200"
                                             title="Marcar como Facturado">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
+                                            <i class="fas fa-check-circle"></i>
                                         </button>
                                         <button wire:click="showClientInfo({{ $sale->id }})"
                                             class="text-blue-600 hover:text-blue-900 transition-colors duration-200"
                                             title="Ver Información del Cliente">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path
-                                                    d="M10 2a6 6 0 100 12 6 6 0 000-12zM8 7a2 2 0 114 0 2 2 0 01-4 0zm2 8a5.978 5.978 0 01-4.472-2.09A4.978 4.978 0 0110 12a4.978 4.978 0 014.472 2.91A5.978 5.978 0 0110 15z" />
-                                            </svg>
+                                            <i class="fas fa-info-circle"></i>
                                         </button>
                                     @elseif ($sale->status_fac === 'no_aplicable')
-                                        <button
-                                            wire:click="confirmStatusChange({{ $sale->id }}, 'pendiente_facturacion')"
+                                        <button wire:click="confirmStatusChange({{ $sale->id }}, 'pendiente_facturacion')"
                                             class="text-green-600 hover:text-green-900 transition-colors duration-200"
                                             title="Cambiar a Pendiente Facturación">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
+                                            <i class="fas fa-sync-alt"></i>
                                         </button>
                                     @endif
                                     <button wire:click="confirmDelete({{ $sale->id }})"
                                         class="text-red-600 hover:text-red-900 transition-colors duration-200"
                                         title="Eliminar">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                            fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <!-- Enlace para descargar el PDF -->
+                                    <button wire:click="generateSalePdf({{ $sale->id }})"
+                                        class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200"
+                                        title="Generar PDF de la Venta">
+                                        <i class="fas fa-file-pdf"></i>
                                     </button>
                                 </div>
                             </td>
+
+
+
                         </tr>
 
                         @if ($selectedSale === $sale->id)

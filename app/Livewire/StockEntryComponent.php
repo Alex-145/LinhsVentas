@@ -97,6 +97,7 @@ class StockEntryComponent extends Component
         $this->total_dollar = 0;
         $this->total_soles = 0; // Total en soles
         $this->dollar_value = 0; // Valor del dólar
+        $this->disableInputs = false;
         session()->flash('message', 'Entrada de stock cancelada.');
     }
 
