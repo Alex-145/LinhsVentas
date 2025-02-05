@@ -41,7 +41,41 @@ class SalesComponent extends Component
     public $status_fac = 'no_aplicable';
     public $showConfirmationModal = false;
     public $validationMessage = '';
+    // Variables para el modal
+    public $name;
+    public $dni_ruc;
+    public $business_name;
+    public $phone_number;
 
+    protected $rules = [
+        'name' => 'required|string|max:255',
+        'dni_ruc' => 'nullable|string|max:20|unique:clients,dni_ruc',
+        'business_name' => 'nullable|string|max:255',
+        'phone_number' => 'nullable|string|max:15',
+    ];
+
+    public function createClient()
+{
+    // Validar y guardar los datos
+    $this->validate();
+
+    // Crear el cliente
+    $client = Client::create([
+        'name' => $this->name,
+        'dni_ruc' => $this->dni_ruc,
+        'business_name' => $this->business_name,
+        'phone_number' => $this->phone_number,
+    ]);
+
+    // Limpiar los campos
+    $this->reset(['name', 'dni_ruc', 'business_name', 'phone_number']);
+
+    // Seleccionar el cliente recién creado
+    $this->selectClient($client->id);
+
+    // Emitir el evento para cerrar el modal
+    $this->dispatch('close-modal');
+}
 
     protected $listeners = ['toggleMenu' => 'updateMenuState'];
 
