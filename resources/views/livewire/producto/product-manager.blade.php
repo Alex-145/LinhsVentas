@@ -1,4 +1,5 @@
-<div class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-full sm:max-w-7xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-xl rounded-xl transition-all duration-300 ease-in-out">
+<div
+    class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-full sm:max-w-7xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-xl rounded-xl transition-all duration-300 ease-in-out">
 
     <!-- Success Message -->
     @if (session()->has('message'))
@@ -55,42 +56,57 @@
                 <tr>
                     @foreach (['Nombre', 'Precio de Compra', 'Precio de Venta', 'Utilidad', 'Stock', 'Acciones'] as $header)
                         <th class="py-3 px-4 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
-                            {{ $header }}</th>
+                            {{ $header }}
+                        </th>
                     @endforeach
                 </tr>
             </thead>
             <tbody>
                 @foreach ($products as $product)
-                    <tr class="border-b hover:bg-gray-100 transition duration-200">
-                        <td class="px-4 py-2 text-gray-800">{{ $product->name }}</td>
-                        <td class="px-4 py-2 text-gray-800">S/.{{ $product->purchase_price }}</td>
-                        <td class="px-4 py-2 text-gray-800">S/.{{ $product->sale_price }}</td>
-                        <td class="px-4 py-2 text-gray-800">S/.{{ $product->profit }}</td>
-                        <td class="px-4 py-2 text-gray-800">{{ $product->stock }}</td>
+                    <tr class="border-b hover:bg-gray-100 transition duration-200 cursor-pointer">
+                        <td class="px-4 py-2 text-gray-800" wire:click="toggleAttributes({{ $product->id }})">
+                            {{ $product->name }}</td>
+                        <td class="px-4 py-2 text-gray-800" wire:click="toggleAttributes({{ $product->id }})">
+                            S/.{{ $product->purchase_price }}</td>
+                        <td class="px-4 py-2 text-gray-800" wire:click="toggleAttributes({{ $product->id }})">
+                            S/.{{ $product->sale_price }}</td>
+                        <td class="px-4 py-2 text-gray-800" wire:click="toggleAttributes({{ $product->id }})">
+                            S/.{{ $product->profit }}</td>
+                        <td class="px-4 py-2 text-gray-800" wire:click="toggleAttributes({{ $product->id }})">
+                            {{ $product->stock }}</td>
                         <td class="px-4 py-3 text-sm text-gray-800 flex items-center space-x-4">
-                            <button wire:click="edit({{ $product->id }})"
+                            <button wire:click.stop="edit({{ $product->id }})"
                                 class="text-indigo-600 hover:text-indigo-900 transition-colors duration-200 flex items-center">
-                                <i class="fas fa-edit" style="font-size: 18px;"></i> <!-- Icono de editar -->
+                                <i class="fas fa-edit" style="font-size: 18px;"></i>
                             </button>
-                            <button wire:click="openPhotoModal({{ $product->id }})"
+                            <button wire:click.stop="openPhotoModal({{ $product->id }})"
                                 class="text-indigo-600 hover:text-indigo-900 transition-colors duration-200 flex items-center">
-                                <i class="fas fa-camera" style="font-size: 18px; color: black;"></i> <!-- Icono de cámara en negro -->
+                                <i class="fas fa-camera" style="font-size: 18px; color: black;"></i>
                             </button>
-                            <button wire:click="confirmStatusChange({{ $product->id }})"
+                            <button wire:click.stop="confirmStatusChange({{ $product->id }})"
                                 class="transition-colors duration-200 flex items-center"
                                 style="color: {{ $product->status == 'published' ? 'red' : 'green' }};">
-                                <i class="fas fa-eye" style="font-size: 18px;"></i> <!-- Icono de ojo -->
+                                <i class="fas fa-eye" style="font-size: 18px;"></i>
                             </button>
-                            <button wire:click="confirmDelete({{ $product->id }})"
+                            <button wire:click.stop="confirmDelete({{ $product->id }})"
                                 class="text-red-600 hover:text-red-900 transition-colors duration-200 flex items-center">
-                                <i class="fa-regular fa-trash-can" style="font-size: 18px;"></i> <!-- Icono de basurero -->
+                                <i class="fa-regular fa-trash-can" style="font-size: 18px;"></i>
                             </button>
                         </td>
                     </tr>
+
+                    @if ($selectedProductId2 == $product->id)
+                        @livewire('product-attribute', ['product' => $product, 'productAttributes' => $productAttributes], key($product->id))
+                    @endif
+
+                    {{-- @if ($selectedProductId2 == $product->id)
+                        @livewire('product-attribute')
+                    @endif --}}
                 @endforeach
             </tbody>
         </table>
     </div>
+
 
     <!-- Modal para cambiar foto -->
     <div x-data="{ open: @entangle('photoModalOpen') }" x-show="open" @keydown.window.escape="open = false"
@@ -137,8 +153,12 @@
         </div>
     @endif
 
+
+
     <!-- Pagination -->
     <div class="mt-6">
         {{ $products->links() }}
     </div>
+
+
 </div>

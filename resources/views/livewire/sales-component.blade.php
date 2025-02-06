@@ -149,7 +149,12 @@
         </div>
 
 
-
+        <!-- Sección de dolar -->
+        <div class="flex items-center space-x-2">
+            <span class="text-sm font-medium text-gray-700">Valor del Dólar (USD a PEN):</span>
+            <span
+                class="font-bold text-green-600">{{ $dollarValue ? number_format($dollarValue, 2) : 'Cargando...' }}</span>
+        </div>
         <div class="flex space-x-4">
             <!-- Buscador de Productos -->
             <div class="w-1/2">

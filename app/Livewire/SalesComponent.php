@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Client;
 use App\Models\Sale;
 use App\Models\Service;
+use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 
 class SalesComponent extends Component
@@ -46,6 +47,7 @@ class SalesComponent extends Component
     public $dni_ruc;
     public $business_name;
     public $phone_number;
+    public $dollarValue;
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -55,30 +57,41 @@ class SalesComponent extends Component
     ];
 
     public function createClient()
-{
-    // Validar y guardar los datos
-    $this->validate();
+    {
+        // Validar y guardar los datos
+        $this->validate();
 
-    // Crear el cliente
-    $client = Client::create([
-        'name' => $this->name,
-        'dni_ruc' => $this->dni_ruc,
-        'business_name' => $this->business_name,
-        'phone_number' => $this->phone_number,
-    ]);
+        // Crear el cliente
+        $client = Client::create([
+            'name' => $this->name,
+            'dni_ruc' => $this->dni_ruc,
+            'business_name' => $this->business_name,
+            'phone_number' => $this->phone_number,
+        ]);
 
-    // Limpiar los campos
-    $this->reset(['name', 'dni_ruc', 'business_name', 'phone_number']);
+        // Limpiar los campos
+        $this->reset(['name', 'dni_ruc', 'business_name', 'phone_number']);
 
-    // Seleccionar el cliente recién creado
-    $this->selectClient($client->id);
+        // Seleccionar el cliente recién creado
+        $this->selectClient($client->id);
 
-    // Emitir el evento para cerrar el modal
-    $this->dispatch('close-modal');
-}
+        // Emitir el evento para cerrar el modal
+        $this->dispatch('close-modal');
+    }
 
     protected $listeners = ['toggleMenu' => 'updateMenuState'];
 
+    public function mount()
+    {
+        $this->dolarvalues();
+
+    }
+    public function dolarvalues()
+    {
+        // Llamada a la API para obtener el valor del dólar
+        $response = Http::get('https://api.exchangerate-api.com/v4/latest/USD');
+        $this->dollarValue = $response->json()['rates']['PEN']; // PEN es el código de Soles en la API
+    }
     public function updateMenuState()
     {
         $this->menuAbierto = !$this->menuAbierto;

@@ -22,7 +22,9 @@ class ProductManager extends Component
     public $productIdToDelete;
     public $confirmingStatusChange = false;
     public $selectedProductId;
+    public $selectedProductId2;
     public $selectedProduct;
+    public $productAttributes = [];
 
 
 
@@ -165,6 +167,24 @@ class ProductManager extends Component
 
         session()->flash('message', 'Producto creado correctamente.');
         $this->resetForm();
+    }
+    public function toggleAttributes($productId)
+    {
+        if ($this->selectedProductId2 === $productId) {
+            $this->selectedProductId2 = null;
+            $this->productAttributes = [];
+        } else {
+            $this->selectedProductId2 = $productId;
+            $this->loadAttributes($productId);
+        }
+    }
+
+    public function loadAttributes($productId)
+    {
+        $product = Product::with('attributes')->find($productId);
+        $this->productAttributes = $product->attributes->mapWithKeys(function ($attribute) {
+            return [$attribute->name => $attribute->pivot->value];
+        })->toArray();
     }
 
     public function edit($id)

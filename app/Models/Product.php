@@ -30,7 +30,13 @@ class Product extends Model
     {
         return $this->brand ? $this->brand->category() : null;
     }
-
+    // Relación muchos a muchos con Attribute
+    public function attributes()
+    {
+        return $this->belongsToMany(Attribute::class, 'attribute_products')
+            ->withPivot('value')
+            ->withTimestamps();
+    }
 
     // public function saleDetails()
     // {
