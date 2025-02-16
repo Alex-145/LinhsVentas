@@ -1,48 +1,45 @@
-<div class="fixed z-10 inset-0 overflow-y-auto ease-out duration-400">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>​
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
-            <form>
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="">
-                        <div class="mb-4">
-                            <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Nombre:</label>
-                            <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" placeholder="Ingrese el Nombre" wire:model="name">
-                            @error('name') <span class="text-red-500">{{ $message }}</span>@enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="dni_ruc" class="block text-gray-700 text-sm font-bold mb-2">DNI/RUC:</label>
-                            <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="dni_ruc" placeholder="Ingrese DNI/RUC" wire:model="dni_ruc">
-                            @error('dni_ruc') <span class="text-red-500">{{ $message }}</span>@enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="business_name" class="block text-gray-700 text-sm font-bold mb-2">Razón Social:</label>
-                            <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="business_name" placeholder="Ingrese la Razón Social" wire:model="business_name">
-                            @error('business_name') <span class="text-red-500">{{ $message }}</span>@enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="phone_number" class="block text-gray-700 text-sm font-bold mb-2">Número de Teléfono:</label>
-                            <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="phone_number" placeholder="Ingrese el Número de Teléfono" wire:model="phone_number">
-                            @error('phone_number') <span class="text-red-500">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <span class="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
-                        <button wire:click.prevent="store()" type="button" class="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-green-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-green-500 focus:outline-none focus:border-green-700 focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5">
-                            Guardar
-                        </button>
-                    </span>
-                    <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
-                        <button wire:click="closeModal()" type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
-                            Cancelar
-                        </button>
-                    </span>
-                </div>
-            </form>
-        </div>
+<div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+    <div class="bg-white p-6 rounded-lg w-96 shadow-xl">
+        <h2 class="text-xl font-semibold mb-4">Nuevo Cliente</h2>
+        <form wire:submit.prevent="store">
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="name" wire:model="name" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ingrese el Nombre" required />
+                @error('name') <span class="text-red-500">{{ $message }}</span>@enderror
+            </div>
+            <div class="mb-4">
+                <label for="dni" class="block text-sm font-medium text-gray-700">DNI</label>
+                <input type="text" id="dni" wire:model="dni" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ingrese DNI" />
+                @error('dni') <span class="text-red-500">{{ $message }}</span>@enderror
+            </div>
+            <div class="mb-4">
+                <label for="ruc" class="block text-sm font-medium text-gray-700">RUC</label>
+                <input type="text" id="ruc" wire:model="ruc" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ingrese RUC" />
+                @error('ruc') <span class="text-red-500">{{ $message }}</span>@enderror
+            </div>
+            <div class="mb-4">
+                <label for="business_name" class="block text-sm font-medium text-gray-700">Razón Social</label>
+                <input type="text" id="business_name" wire:model="business_name" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ingrese la Razón Social" />
+                @error('business_name') <span class="text-red-500">{{ $message }}</span>@enderror
+            </div>
+            <div class="mb-4">
+                <label for="phone_number" class="block text-sm font-medium text-gray-700">Número de Teléfono</label>
+                <input type="text" id="phone_number" wire:model="phone_number" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ingrese el Número de Teléfono" />
+                @error('phone_number') <span class="text-red-500">{{ $message }}</span>@enderror
+            </div>
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                <input type="email" id="email" wire:model="email" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ingrese el Correo Electrónico" />
+                @error('email') <span class="text-red-500">{{ $message }}</span>@enderror
+            </div>
+            <div class="flex justify-end">
+                <button type="button" wire:click="closeModal" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                    Cancelar
+                </button>
+                <button type="submit" class="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    Guardar
+                </button>
+            </div>
+        </form>
     </div>
 </div>

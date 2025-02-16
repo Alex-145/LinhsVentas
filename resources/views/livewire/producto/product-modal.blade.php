@@ -32,34 +32,46 @@
                     @endforeach
 
                     <!-- Categoría -->
-                    <div>
-                        <label for="category_id" class="text-lg font-medium text-gray-700">Categoría</label>
-                        <select wire:model="category_id" wire:change="updateBrands($event.target.value)"
-                            class="form-select mt-2 block w-full text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Seleccione una categoría</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('category_id')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
+                    <div class="flex items-center space-x-2">
+                        <div class="w-full">
+                            <label for="category_id" class="text-lg font-medium text-gray-700">Categoría</label>
+                            <select wire:model="category_id" wire:change="updateBrands($event.target.value)"
+                                class="form-select mt-2 block w-full text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Seleccione una categoría</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('category_id')
+                                <span class="text-red-500 text-xs">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <button wire:click=""
+                            class="mt-7 px-3 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600">
+                            +
+                        </button>
                     </div>
 
                     <!-- Marca -->
-                    <div>
-                        <label for="brand_id" class="text-lg font-medium text-gray-700">Marca</label>
-                        <select wire:model="brand_id"
-                            class="form-select mt-2 block w-full text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            required>
-                            <option value="">Seleccione una marca</option>
-                            @foreach ($brands as $brand)
-                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('brand_id')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
+                    <div class="flex items-center space-x-2">
+                        <div class="w-full">
+                            <label for="brand_id" class="text-lg font-medium text-gray-700">Marca</label>
+                            <select wire:model="brand_id"
+                                class="form-select mt-2 block w-full text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                required>
+                                <option value="">Seleccione una marca</option>
+                                @foreach ($brands as $brand)
+                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('brand_id')
+                                <span class="text-red-500 text-xs">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <button wire:click=""
+                            class="mt-7 px-3 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600">
+                            +
+                        </button>
                     </div>
 
                     <button type="submit"

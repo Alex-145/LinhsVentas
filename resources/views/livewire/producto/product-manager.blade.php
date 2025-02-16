@@ -99,9 +99,6 @@
                         @livewire('product-attribute', ['product' => $product, 'productAttributes' => $productAttributes], key($product->id))
                     @endif
 
-                    {{-- @if ($selectedProductId2 == $product->id)
-                        @livewire('product-attribute')
-                    @endif --}}
                 @endforeach
             </tbody>
         </table>

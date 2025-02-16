@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Nombre
-            $table->string('dni_ruc')->nullable(); // DNI o RUC
+            $table->string('dni')->nullable(); // DNI o RUC
+            $table->string('ruc')->nullable(); // RUC
             $table->string('business_name')->nullable(); // Razón Social
             $table->string('phone_number')->nullable(); // Número celular
+            $table->string('email')->unique()->nullable(); // Email
             $table->timestamps();
         });
     }

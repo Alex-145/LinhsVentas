@@ -12,7 +12,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
             <!-- Buscar Cliente -->
-            <div x-data="{ openModal: false, name: '', dni_ruc: '', business_name: '', phone_number: '' }">
+            <div x-data="{ openModal: false, name: '', dni: '', ruc: '', business_name: '', phone_number: '' }">
                 <label for="clientSearch" class="block text-sm font-medium text-gray-700 mb-2">Buscar Cliente</label>
                 <div class="flex items-center">
                     <!-- Campo de búsqueda -->
@@ -26,7 +26,7 @@
                             </svg>
                         </div>
                         <input type="text" id="clientSearch" wire:model="clientSearch" wire:keydown="searchClient"
-                            placeholder="Nombre, DNI/RUC o Razón Social"
+                            placeholder="Nombre, DNI, RUC o Razón Social"
                             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                             aria-describedby="clientSearchHelp" />
                         <!-- Lista de resultados -->
@@ -38,7 +38,9 @@
                                         class="px-4 py-3 cursor-pointer hover:bg-indigo-50 transition duration-200 ease-in-out border-b border-gray-200 last:border-b-0">
                                         <div class="flex justify-between items-center">
                                             <span class="text-gray-800 font-medium">{{ $client->name }}</span>
-                                            <span class="text-sm text-gray-500">{{ $client->dni_ruc }}</span>
+                                            <span class="text-sm text-gray-500">{{ $client->dni }}</span>
+                                            <span class="text-sm text-gray-500">{{ $client->ruc }}</span>
+
                                         </div>
                                         @if ($client->business_name)
                                             <p class="text-sm text-gray-500 mt-1">{{ $client->business_name }}</p>
@@ -55,7 +57,7 @@
                     </button>
                 </div>
                 <p id="clientSearchHelp" class="mt-2 text-sm text-gray-500">
-                    Escribe para buscar clientes por nombre, DNI/RUC o razón social.
+                    Escribe para buscar clientes por nombre, DNI, RUC o razón social.
                 </p>
 
                 <!-- Modal para agregar nuevo cliente -->
@@ -70,8 +72,13 @@
                                     class="w-full p-2 border border-gray-300 rounded-lg" required />
                             </div>
                             <div class="mb-4">
-                                <label for="dni_ruc" class="block text-sm font-medium text-gray-700">DNI/RUC</label>
-                                <input type="text" id="dni_ruc" wire:model="dni_ruc"
+                                <label for="dni" class="block text-sm font-medium text-gray-700">DNI</label>
+                                <input type="text" id="dni" wire:model="dni"
+                                    class="w-full p-2 border border-gray-300 rounded-lg" />
+                            </div>
+                            <div class="mb-4">
+                                <label for="ruc" class="block text-sm font-medium text-gray-700">RUC</label>
+                                <input type="text" id="ruc" wire:model="ruc"
                                     class="w-full p-2 border border-gray-300 rounded-lg" />
                             </div>
                             <div class="mb-4">
@@ -84,6 +91,12 @@
                                 <label for="phone_number" class="block text-sm font-medium text-gray-700">Número de
                                     Teléfono</label>
                                 <input type="text" id="phone_number" wire:model="phone_number"
+                                    class="w-full p-2 border border-gray-300 rounded-lg" />
+                            </div>
+                            <div class="mb-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700">Correo
+                                    Electronico</label>
+                                <input type="text" id="email" wire:model="email"
                                     class="w-full p-2 border border-gray-300 rounded-lg" />
                             </div>
                             <div class="flex justify-end">
@@ -109,17 +122,24 @@
                                 class="w-4 h-4 text-green-700 transition-transform duration-200" fill="none"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" stroke="currentColor"
                                 aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7l5 5 5-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 7l5 5 5-5">
                                 </path>
                             </svg>
                         </div>
 
                         <div x-show="open" x-transition class="p-4 bg-green-50 rounded-b-lg">
-                            <p class="text-green-700 text-sm"><strong>DNI/RUC:</strong> {{ $selectedClient['dni_ruc'] }}
-                            </p>
+                            @if (!empty($selectedClient['ruc']))
+                                <p class="text-green-700 text-sm"><strong>RUC:</strong> {{ $selectedClient['ruc'] }}
+                                </p>
+                            @else
+                                <p class="text-green-700 text-sm"><strong>DNI:</strong> {{ $selectedClient['dni'] }}
+                                </p>
+                            @endif
                             <p class="text-green-700 text-sm"><strong>Razón Social:</strong>
                                 {{ $selectedClient['business_name'] ?? 'N/A' }}</p>
                         </div>
+
                     </div>
                 @endif
             </div>
@@ -149,12 +169,6 @@
         </div>
 
 
-        <!-- Sección de dolar -->
-        <div class="flex items-center space-x-2">
-            <span class="text-sm font-medium text-gray-700">Valor del Dólar (USD a PEN):</span>
-            <span
-                class="font-bold text-green-600">{{ $dollarValue ? number_format($dollarValue, 2) : 'Cargando...' }}</span>
-        </div>
         <div class="flex space-x-4">
             <!-- Buscador de Productos -->
             <div class="w-1/2">

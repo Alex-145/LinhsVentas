@@ -44,14 +44,17 @@ class SalesComponent extends Component
     public $validationMessage = '';
     // Variables para el modal
     public $name;
-    public $dni_ruc;
+    public $dni;
+    public $ruc;
     public $business_name;
     public $phone_number;
+    public $email;
     public $dollarValue;
 
     protected $rules = [
         'name' => 'required|string|max:255',
-        'dni_ruc' => 'nullable|string|max:20|unique:clients,dni_ruc',
+        'dni' => 'nullable|string|max:20|unique:clients,dni',
+        'ruc' => 'nullable|string|max:20|unique:clients,ruc',
         'business_name' => 'nullable|string|max:255',
         'phone_number' => 'nullable|string|max:15',
     ];
@@ -64,13 +67,15 @@ class SalesComponent extends Component
         // Crear el cliente
         $client = Client::create([
             'name' => $this->name,
-            'dni_ruc' => $this->dni_ruc,
+            'dni' => $this->dni,
+            'ruc' => $this->ruc,
             'business_name' => $this->business_name,
             'phone_number' => $this->phone_number,
+            'email' => $this->email,
         ]);
 
         // Limpiar los campos
-        $this->reset(['name', 'dni_ruc', 'business_name', 'phone_number']);
+        $this->reset(['name', 'dni', 'ruc', 'business_name', 'phone_number', 'email']);
 
         // Seleccionar el cliente recién creado
         $this->selectClient($client->id);
@@ -81,17 +86,7 @@ class SalesComponent extends Component
 
     protected $listeners = ['toggleMenu' => 'updateMenuState'];
 
-    public function mount()
-    {
-        $this->dolarvalues();
 
-    }
-    public function dolarvalues()
-    {
-        // Llamada a la API para obtener el valor del dólar
-        $response = Http::get('https://api.exchangerate-api.com/v4/latest/USD');
-        $this->dollarValue = $response->json()['rates']['PEN']; // PEN es el código de Soles en la API
-    }
     public function updateMenuState()
     {
         $this->menuAbierto = !$this->menuAbierto;
@@ -164,7 +159,7 @@ class SalesComponent extends Component
 
         if (!empty($this->clientSearch)) {
             $this->clientResults = Client::where('name', 'like', '%' . $this->clientSearch . '%')
-                ->orWhere('dni_ruc', 'like', '%' . $this->clientSearch . '%')
+                ->orWhere('dni', 'ruc', 'like', '%' . $this->clientSearch . '%')
                 ->orWhere('business_name', 'like', '%' . $this->clientSearch . '%')
                 ->orderBy('name', 'asc')
                 ->get();

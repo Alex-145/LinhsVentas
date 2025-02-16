@@ -10,11 +10,11 @@ class ClientManager extends Component
 {
     use WithPagination;
 
-    public $name, $dni_ruc, $business_name, $phone_number;
+    public $name, $dni, $ruc, $business_name, $phone_number, $email;
     public $client_id;
     public $isOpen = false;
     public $menuAbierto = true;
-    public $searchTerm = ''; // Propiedad para almacenar el término de búsqueda
+    public $searchTerm = '';
 
     protected $listeners = ['toggleMenu' => 'updateMenuState'];
 
@@ -25,13 +25,14 @@ class ClientManager extends Component
 
     public function render()
     {
-        // Modificar la consulta para incluir el filtro de búsqueda
         $clients = Client::when($this->searchTerm, function ($query) {
             $query->where('name', 'like', '%' . $this->searchTerm . '%')
-                ->orWhere('dni_ruc', 'like', '%' . $this->searchTerm . '%')
-                ->orWhere('business_name', 'like', '%' . $this->searchTerm . '%');
-        })
-        ->paginate(10);
+                ->orWhere('dni', 'like', '%' . $this->searchTerm . '%')
+                ->orWhere('ruc', 'like', '%' . $this->searchTerm . '%')
+                ->orWhere('business_name', 'like', '%' . $this->searchTerm . '%')
+                ->orWhere('phone_number', 'like', '%' . $this->searchTerm . '%')
+                ->orWhere('email', 'like', '%' . $this->searchTerm . '%');
+        })->paginate(10);
 
         return view('livewire.client-manager', [
             'clients' => $clients
@@ -57,9 +58,11 @@ class ClientManager extends Component
     private function resetInputFields()
     {
         $this->name = '';
-        $this->dni_ruc = '';
+        $this->dni = '';
+        $this->ruc = '';
         $this->business_name = '';
         $this->phone_number = '';
+        $this->email = '';
         $this->client_id = '';
     }
 
@@ -67,17 +70,22 @@ class ClientManager extends Component
     {
         $this->validate([
             'name' => 'required',
-            'dni_ruc' => 'required|unique:clients,dni_ruc,' . $this->client_id,
-            'business_name' => 'required',
-            'phone_number' => 'required',
+            'dni' => 'nullable|unique:clients,dni,' . $this->client_id,
+            'ruc' => 'nullable|unique:clients,ruc,' . $this->client_id,
+            'business_name' => 'nullable',
+            'phone_number' => 'nullable',
+            'email' => 'nullable|email|unique:clients,email,' . $this->client_id,
         ]);
 
         Client::updateOrCreate(['id' => $this->client_id], [
             'name' => $this->name,
-            'dni_ruc' => $this->dni_ruc,
-            'business_name' => $this->business_name,
-            'phone_number' => $this->phone_number,
+            'dni' => $this->dni ?: null,
+            'ruc' => $this->ruc ?: null,
+            'business_name' => $this->business_name ?: null,
+            'phone_number' => $this->phone_number ?: null,
+            'email' => $this->email ?: null, // Convierte cadena vacía a null
         ]);
+
 
         session()->flash('message', $this->client_id ? 'Cliente actualizado con éxito.' : 'Cliente creado con éxito.');
 
@@ -90,9 +98,11 @@ class ClientManager extends Component
         $client = Client::findOrFail($id);
         $this->client_id = $id;
         $this->name = $client->name;
-        $this->dni_ruc = $client->dni_ruc;
+        $this->dni = $client->dni;
+        $this->ruc = $client->ruc;
         $this->business_name = $client->business_name;
         $this->phone_number = $client->phone_number;
+        $this->email = $client->email;
 
         $this->openModal();
     }

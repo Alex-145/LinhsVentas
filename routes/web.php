@@ -8,6 +8,7 @@ use App\Livewire\ClientManager;
 use App\Livewire\Pageweb\Contactenos;
 use App\Livewire\Pageweb\Nosotros;
 use App\Livewire\Pageweb\Products;
+use App\Livewire\Pageweb\ProductShow;
 use App\Livewire\Pageweb\Service;
 use App\Livewire\ProductManager;
 use App\Livewire\Producto\ProductLowStock;
@@ -31,6 +32,8 @@ Route::get('/wproducts', Products::class)->name('wproducts.index');
 Route::get('/wservices', Service::class)->name('wservices.index');
 Route::get('/wnosotros', Nosotros::class)->name('wnosotros.index');
 Route::get('/wcontactenos', Contactenos::class)->name('wcontactenos.index');
+Route::get('/wproductshow/{id}', ProductShow::class)->name('product.show');
+
 
 
 

@@ -13,17 +13,27 @@ class ProductAttribute extends Component
     public $newAttributeName;
     public $newAttributeValue;
     public $suggestedAttributes = [];
+    public $editingAttributeId;
 
+    public function editAttribute($attributeId, $newValue)
+    {
+        // Verificar si el nuevo valor no está vacío
+        if (!empty($newValue)) {
+            // Actualizar el valor del atributo en la tabla pivote
+            $this->product->attributes()->updateExistingPivot($attributeId, ['value' => $newValue]);
 
-
+            // Actualizar el listado de atributos del producto
+            $this->productAttributes = $this->product->attributes->pluck('pivot.value', 'name')->toArray();
+        }
+    }
     public function removeAttribute($attributeId)
-{
-    // Eliminar la relación entre el producto y el atributo
-    $this->product->attributes()->detach($attributeId);
+    {
+        // Eliminar la relación entre el producto y el atributo
+        $this->product->attributes()->detach($attributeId);
 
-    // Actualizar el listado de atributos del producto
-    $this->productAttributes = $this->product->attributes->pluck('pivot.value', 'name')->toArray();
-}
+        // Actualizar el listado de atributos del producto
+        $this->productAttributes = $this->product->attributes->pluck('pivot.value', 'name')->toArray();
+    }
 
 
     public function mount($product, $productAttributes = [])
@@ -33,15 +43,15 @@ class ProductAttribute extends Component
     }
 
     public function render()
-{
-    $productAttributes = $this->product->attributes->mapWithKeys(function($attribute) {
-        return [$attribute->name => $attribute->id];
-    });
+    {
+        $productAttributes = $this->product->attributes->mapWithKeys(function ($attribute) {
+            return [$attribute->name => $attribute->pivot->value];
+        });
 
-    return view('livewire.product-attribute', [
-        'productAttributes' => $productAttributes,
-    ]);
-}
+        return view('livewire.product-attribute', [
+            'productAttributes' => $productAttributes,
+        ]);
+    }
 
 
     public function addAttribute()
