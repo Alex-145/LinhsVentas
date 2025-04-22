@@ -116,8 +116,6 @@ class SalesList extends Component
 
         // Sin filtros de fecha, mostramos todas las ventas
         $this->sales = $query->get();
-
-
     }
 
 

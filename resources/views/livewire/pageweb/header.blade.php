@@ -79,9 +79,18 @@
                 @endif
 
                 <!-- Cart Icon -->
-                <a href="#" wire:click.prevent="$dispatch('openCartModal')"
+                <!-- Cart Icon -->
+                <a href="#" x-data
+                    @click.prevent="
+    @if (request()->routeIs('wfinalsale.index')) $el.classList.add('animate-bounce');
+        setTimeout(() => $el.classList.remove('animate-bounce'), 500);
+    @else
+        $dispatch('openCartModal') @endif
+"
                     class="relative rounded-md px-3 py-2 transition transform hover:scale-110 focus:outline-none focus-visible:ring-[#FF2D20]">
+
                     <i class="fas fa-shopping-cart text-2xl text-[#ebe7d9] hover:text-[#f55139]"></i>
+
                     @if ($totalItems > 0)
                         <span
                             class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 transform translate-x-1/2 -translate-y-1/2">

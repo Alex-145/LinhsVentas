@@ -12,7 +12,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
             <!-- Buscar Cliente -->
-            <div x-data="{ openModal: false, name: '', dni: '', ruc: '', business_name: '', phone_number: '' }">
+            <div x-data="{ openModal: false }" x-on:close-modal.window="openModal = false">
+
                 <label for="clientSearch" class="block text-sm font-medium text-gray-700 mb-2">Buscar Cliente</label>
                 <div class="flex items-center">
                     <!-- Campo de búsqueda -->
@@ -112,6 +113,13 @@
                         </form>
                     </div>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Livewire.on('clientAdded', () => {
+                            document.dispatchEvent(new CustomEvent('close-modal'));
+                        });
+                    });
+                </script>
 
                 @if ($selectedClient)
                     <div x-data="{ open: false }"

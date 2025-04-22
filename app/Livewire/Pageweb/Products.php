@@ -123,28 +123,28 @@ class Products extends Component
     }
 
     private function applyAttributeFilter($query)
-{
-    if (!empty($this->selectedAttributes)) {
-        foreach ($this->selectedAttributes as $attributeId => $values) {
-            // Si $values no es un array, lo convertimos en uno
-            if (!is_array($values)) {
-                $values = [$values];
-            }
+    {
+        if (!empty($this->selectedAttributes)) {
+            foreach ($this->selectedAttributes as $attributeId => $values) {
+                // Si $values no es un array, lo convertimos en uno
+                if (!is_array($values)) {
+                    $values = [$values];
+                }
 
-            // Filtra los valores en donde el checkbox está marcado (true)
-            $validValues = array_keys(array_filter($values, function ($value) {
-                return $value !== false; // Solo mantenemos los valores que no sean `false`
-            }));
+                // Filtra los valores en donde el checkbox está marcado (true)
+                $validValues = array_keys(array_filter($values, function ($value) {
+                    return $value !== false; // Solo mantenemos los valores que no sean `false`
+                }));
 
-            if (!empty($validValues)) {
-                $query->whereHas('attributes', function ($q) use ($attributeId, $validValues) {
-                    $q->where('attribute_id', $attributeId)
-                      ->whereIn('attribute_products.value', $validValues);
-                });
+                if (!empty($validValues)) {
+                    $query->whereHas('attributes', function ($q) use ($attributeId, $validValues) {
+                        $q->where('attribute_id', $attributeId)
+                            ->whereIn('attribute_products.value', $validValues);
+                    });
+                }
             }
         }
     }
-}
 
 
 

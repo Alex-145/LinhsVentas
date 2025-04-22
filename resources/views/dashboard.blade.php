@@ -1,3 +1,6 @@
 <x-app-layout>
-<h1>ga  </h1>
+
+    {{-- Componente Livewire con el gráfico --}}
+    <livewire:dashboard-chart />
+
 </x-app-layout>

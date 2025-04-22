@@ -17,18 +17,26 @@ class Carrito extends Component
 
     public function mount()
     {
-        // Recuperar el carrito de la sesión al inicializar el componente
-        $this->cart = Session::get('cart', []);
+        $cart = Session::get('cart', []);
+
+        // Eliminar productos inválidos al cargar el carrito
+        $this->cart = array_filter($cart, function ($item, $productId) {
+            $product = Product::find($productId);
+            return $product && $product->status === 'published' && $product->stock > 0;
+        }, ARRAY_FILTER_USE_BOTH);
+
         $this->calculateSubtotal(); // Calcular el subtotal inicial
+        Session::put('cart', $this->cart); // Guardar cambios en sesión
     }
 
+
     public function calculateSubtotal()
-{
-    $this->subtotal = 0; // Reiniciar el subtotal
-    foreach ($this->cart as $item) {
-        $this->subtotal += $item['price'] * $item['quantity']; // Sumar el precio * cantidad de cada producto
+    {
+        $this->subtotal = 0; // Reiniciar el subtotal
+        foreach ($this->cart as $item) {
+            $this->subtotal += $item['price'] * $item['quantity']; // Sumar el precio * cantidad de cada producto
+        }
     }
-}
     public function openModal()
     {
         $this->isOpen = true;
@@ -40,11 +48,12 @@ class Carrito extends Component
     }
 
     public function updateCart($cart)
-{
-    $this->cart = $cart; // Actualiza el carrito con los datos recibidos
-    $this->calculateSubtotal(); // Recalcular el subtotal
-    Session::put('cart', $this->cart); // Guardar el carrito en la sesión
-}
+    {
+        $this->cart = $cart; // Actualiza el carrito con los datos recibidos
+        $this->calculateSubtotal(); // Recalcular el subtotal
+        Session::put('cart', $this->cart); // Guardar el carrito en la sesión
+    }
+
 
     public function removeFromCart($productId)
     {
@@ -84,6 +93,13 @@ class Carrito extends Component
             Session::put('cart', $this->cart); // Guardar el carrito en la sesión
         }
     }
+
+    public function finalizeSale()
+    {
+        Session::put('cart', $this->cart); // Guarda el carrito en la sesión de Laravel
+        return redirect()->route('wfinalsale.index');
+    }
+
 
     public function render()
     {

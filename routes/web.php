@@ -6,6 +6,7 @@ use App\Livewire\BrandCrud;
 use App\Livewire\CategoryCrud;
 use App\Livewire\ClientManager;
 use App\Livewire\Pageweb\Contactenos;
+use App\Livewire\Pageweb\FinalSale;
 use App\Livewire\Pageweb\Nosotros;
 use App\Livewire\Pageweb\Products;
 use App\Livewire\Pageweb\ProductShow;
@@ -32,6 +33,7 @@ Route::get('/wproducts', Products::class)->name('wproducts.index');
 Route::get('/wservices', Service::class)->name('wservices.index');
 Route::get('/wnosotros', Nosotros::class)->name('wnosotros.index');
 Route::get('/wcontactenos', Contactenos::class)->name('wcontactenos.index');
+Route::get('/wfinalsale', FinalSale::class)->name('wfinalsale.index');
 Route::get('/wproductshow/{id}', ProductShow::class)->name('product.show');
 
 

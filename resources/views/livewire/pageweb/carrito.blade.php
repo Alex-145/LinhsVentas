@@ -66,12 +66,14 @@
                         <span class="text-lg font-semibold">S/.{{ number_format($subtotal, 2) }}</span>
                     </div>
 
-                    <!-- Botón de Cerrar -->
-                    <button @click="isOpen = false"
-                        class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                        <i class="fas fa-shopping-cart"></i>
-                        Ver Compras
-                    </button>
+                    @if (count($cart) > 0)
+                        <button wire:click="finalizeSale"
+                            class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            Finalizar Compras
+                        </button>
+                    @endif
+
 
                 </div>
             </div>
