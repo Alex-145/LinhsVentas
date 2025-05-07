@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Client;
+use App\Services\SunatService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -39,6 +40,38 @@ class ClientManager extends Component
         ])->layout('layouts.app');
     }
 
+    public function buscarDni()
+    {
+        if ($this->dni && strlen($this->dni) === 8 && is_numeric($this->dni)) {
+            $persona = SunatService::buscarPorDni($this->dni);
+
+            if ($persona && isset($persona['nombres'])) {
+                $this->name = $persona['nombres'] . ' ' . $persona['apellidoPaterno'] . ' ' . $persona['apellidoMaterno'];
+                session()->flash('message', 'Nombre autocompletado desde RENIEC.');
+            } else {
+                session()->flash('message', 'No se encontró información para el DNI ingresado.');
+            }
+        } else {
+            session()->flash('message', 'Ingrese un DNI válido de 8 dígitos.');
+        }
+    }
+
+    public function buscarRuc()
+    {
+        if ($this->ruc && strlen($this->ruc) === 11 && is_numeric($this->ruc)) {
+            $empresa = SunatService::buscarPorRuc($this->ruc);
+
+            if ($empresa && isset($empresa['razonSocial'])) {
+                $this->business_name = $empresa['razonSocial'];
+                $this->name = $empresa['razonSocial']; // opcional
+                session()->flash('message', 'Razón Social autocompletada desde SUNAT.');
+            } else {
+                session()->flash('message', 'No se encontró información para el RUC ingresado.');
+            }
+        } else {
+            session()->flash('message', 'Ingrese un RUC válido de 11 dígitos.');
+        }
+    }
     public function create()
     {
         $this->resetInputFields();

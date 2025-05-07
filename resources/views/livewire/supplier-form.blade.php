@@ -2,6 +2,18 @@
     <div class="bg-white rounded-lg p-6 w-96">
         <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $supplier_id ? 'Edit' : 'Create' }} Supplier</h3>
         <form wire:submit.prevent="store">
+
+            <div class="mb-4">
+                <label for="ruc" class="block text-sm font-medium text-gray-700">RUC</label>
+                <div class="flex space-x-2">
+                    <input wire:model.defer="ruc" type="text" id="ruc" inputmode="numeric" pattern="\d*"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2">
+                    <button type="button" wire:click="buscarRuc"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-md">Buscar</button>
+                </div>
+            </div>
+
+
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">Supplier Name</label>
                 <input wire:model="name" type="text" id="name"
@@ -13,11 +25,7 @@
                 <input wire:model="cellphone" type="text" id="cellphone" inputmode="numeric" pattern="\d*"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2">
             </div>
-            <div class="mb-4">
-                <label for="ruc" class="block text-sm font-medium text-gray-700">RUC</label>
-                <input wire:model="ruc" type="text" id="ruc" inputmode="numeric" pattern="\d*"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2">
-            </div>
+
             <div class="flex justify-end space-x-2">
                 <button type="button" wire:click="closeModal"
                     class="bg-gray-300 hover:bg-gray-400 text-gray-900 font-bold py-2 px-4 rounded-md">Cancel</button>

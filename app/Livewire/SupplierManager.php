@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Supplier;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Services\SunatService;
+
 
 class SupplierManager extends Component
 {
@@ -21,6 +23,21 @@ class SupplierManager extends Component
     public function updateMenuState()
     {
         $this->menuAbierto = !$this->menuAbierto;
+    }
+    public function buscarRuc()
+    {
+        if ($this->ruc && strlen($this->ruc) === 11 && is_numeric($this->ruc)) {
+            $empresa = SunatService::buscarPorRuc($this->ruc);
+
+            if ($empresa && isset($empresa['razonSocial'])) {
+                $this->name = $empresa['razonSocial'];
+                session()->flash('message', 'RUC encontrado y datos cargados.');
+            } else {
+                session()->flash('message', 'No se encontró información para el RUC ingresado.');
+            }
+        } else {
+            session()->flash('message', 'Ingrese un RUC válido de 11 dígitos.');
+        }
     }
 
     public function render()
