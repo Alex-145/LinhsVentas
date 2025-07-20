@@ -14,67 +14,89 @@ class ProductAttribute extends Component
     public $newAttributeValue;
     public $suggestedAttributes = [];
     public $editingAttributeId;
+    public $attributeValue;
+    public $confirmingAttributeDelete = false;
+    public $attributeToDelete;
+    public $editingModal = false;
 
-    public function editAttribute($attributeId, $newValue)
-    {
-        // Verificar si el nuevo valor no está vacío
-        if (!empty($newValue)) {
-            // Actualizar el valor del atributo en la tabla pivote
-            $this->product->attributes()->updateExistingPivot($attributeId, ['value' => $newValue]);
-
-            // Actualizar el listado de atributos del producto
-            $this->productAttributes = $this->product->attributes->pluck('pivot.value', 'name')->toArray();
-        }
-    }
-    public function removeAttribute($attributeId)
-    {
-        // Eliminar la relación entre el producto y el atributo
-        $this->product->attributes()->detach($attributeId);
-
-        // Actualizar el listado de atributos del producto
-        $this->productAttributes = $this->product->attributes->pluck('pivot.value', 'name')->toArray();
-    }
-
-
-    public function mount($product, $productAttributes = [])
+    public function mount($product)
     {
         $this->product = $product;
-        $this->productAttributes = $productAttributes;
+        $this->loadAttributes(); // carga inicial
     }
+
 
     public function render()
     {
-        $productAttributes = $this->product->attributes->mapWithKeys(function ($attribute) {
-            return [$attribute->name => $attribute->pivot->value];
-        });
+        // Asegurarte de que la propiedad pública esté actualizada (si no lo está)
+        if (empty($this->productAttributes)) {
+            $this->loadAttributes();
+        }
 
         return view('livewire.product-attribute', [
-            'productAttributes' => $productAttributes,
+            'productAttributes' => $this->productAttributes,
         ]);
     }
 
 
     public function addAttribute()
     {
-        if ($this->newAttributeName && $this->newAttributeValue) {
-            $attribute = Attribute::firstOrCreate(['name' => $this->newAttributeName]);
-            $this->product->attributes()->attach($attribute->id, ['value' => $this->newAttributeValue]);
+        $this->validate([
+            'newAttributeName' => 'required|string|max:255',
+            'newAttributeValue' => 'required|string|max:255',
+        ]);
 
-            $this->newAttributeName = '';
-            $this->newAttributeValue = '';
+        $attribute = Attribute::firstOrCreate(['name' => $this->newAttributeName]);
 
-            $this->productAttributes = $this->product->attributes->pluck('pivot.value', 'name')->toArray();
-        }
+        // Usar syncWithoutDetaching para evitar duplicados
+        $this->product->attributes()->syncWithoutDetaching([
+            $attribute->id => ['value' => $this->newAttributeValue]
+        ]);
+
+        $this->reset(['newAttributeName', 'newAttributeValue']);
+        $this->suggestedAttributes = [];
+        $this->loadAttributes();
+
+        session()->flash('message', 'Atributo agregado correctamente.');
+    }
+
+    public function editAttribute($attributeId, $newValue)
+    {
+        $this->validate([
+            'attributeValue' => 'required|string|max:255',
+        ]);
+
+        $this->product->attributes()->updateExistingPivot($attributeId, ['value' => $newValue]);
+        $this->editingAttributeId = null;
+        $this->editingModal = false;
+        $this->loadAttributes();
+
+        session()->flash('message', 'Atributo actualizado correctamente.');
+    }
+
+    public function confirmDeleteAttribute($attributeId)
+    {
+        $this->attributeToDelete = $attributeId;
+        $this->confirmingAttributeDelete = true;
+    }
+
+    public function removeAttribute($attributeId)
+    {
+        $this->product->attributes()->detach($attributeId);
+        $this->confirmingAttributeDelete = false;
+        $this->attributeToDelete = null;
+        $this->loadAttributes();
+
+        session()->flash('message', 'Atributo eliminado correctamente.');
     }
 
     public function updateSuggestions()
     {
-        // Obtener los atributos ya asociados al producto
         $existingAttributes = $this->product->attributes->pluck('name')->toArray();
 
-        if ($this->newAttributeName) {
+        if (strlen($this->newAttributeName) >= 2) {
             $this->suggestedAttributes = Attribute::where('name', 'like', '%' . $this->newAttributeName . '%')
-                ->whereNotIn('name', $existingAttributes)  // Filtrar los que ya están asociados
+                ->whereNotIn('name', $existingAttributes)
                 ->limit(5)
                 ->get();
         } else {
@@ -82,9 +104,35 @@ class ProductAttribute extends Component
         }
     }
 
-    public function selectSuggestion($suggestionName)
+    public function selectSuggestion($name)
     {
-        $this->newAttributeName = $suggestionName;
-        $this->suggestedAttributes = [];  // Vaciar las sugerencias
+        $this->newAttributeName = $name;
+        $this->suggestedAttributes = [];
+    }
+
+    public function openEditModal($attributeId)
+    {
+        $this->editingAttributeId = $attributeId;
+
+        // Buscar el nombre del atributo por su ID
+        foreach ($this->productAttributes as $name => $data) {
+            if (isset($data['id']) && $data['id'] == $attributeId) {
+                $this->attributeValue = $data['value'];
+                break;
+            }
+        }
+
+        $this->editingModal = true;
+    }
+
+
+    protected function loadAttributes()
+    {
+        $this->productAttributes = $this->product->fresh()->attributes->mapWithKeys(function ($attribute) {
+            return [$attribute->name => [
+                'value' => $attribute->pivot->value,
+                'id' => $attribute->id
+            ]];
+        })->toArray();
     }
 }

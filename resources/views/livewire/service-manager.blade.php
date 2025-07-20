@@ -1,97 +1,218 @@
-<div
-    class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-xl rounded-xl transition-all duration-300 ease-in-out">
+<div class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-6 transition-all duration-300 ease-in-out">
 
-    <!-- Success Message -->
-    @if (session()->has('message'))
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-lg">
-            <span class="block sm:inline">{{ session('message') }}</span>
-        </div>
-    @endif
-
-    <!-- Modal de confirmación -->
-    <div x-data="{ open: @entangle('showConfirmModal') }" x-show="open" @keydown.window.escape="open = false"
-        class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white w-full max-w-sm mx-4 rounded-lg p-6 shadow-md">
-            <div class="text-center">
-                <h3 class="text-lg font-semibold mb-4">¿Estás seguro de que deseas eliminar este servicio?</h3>
-                <p class="mb-4 text-sm text-gray-600">Esta acción no se puede deshacer.</p>
-
-                <div class="flex justify-center gap-4">
-                    <button @click="open = false"
-                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md focus:outline-none">Cancelar</button>
-                    <button wire:click="destroy"
-                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md focus:outline-none">Eliminar</button>
+    <!-- Notificación Toast -->
+    @if (session()->has('notify'))
+        <div class="fixed top-4 right-4 z-50 max-w-sm w-full transition-all duration-500" wire:poll.5s="$refresh">
+            <div
+                class="border-l-4 p-4 rounded-lg shadow-lg flex items-start
+                @if (session('notify.type') === 'success') bg-green-100 border-green-500 text-green-700
+                @elseif (session('notify.type') === 'error') bg-red-100 border-red-500 text-red-700
+                @elseif (session('notify.type') === 'info') bg-blue-100 border-blue-500 text-blue-700 @endif
+            ">
+                <div class="flex-shrink-0">
+                    @if (session('notify.type') === 'success')
+                        <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    @elseif (session('notify.type') === 'error')
+                        <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    @elseif (session('notify.type') === 'info')
+                        <svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    @endif
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium">{{ session('notify.message') }}</p>
                 </div>
             </div>
         </div>
+    @endif
+
+    <!-- MODAL: Confirmar eliminación -->
+    @if ($showConfirmModal)
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white w-full max-w-md mx-4 rounded-lg p-6 shadow-xl">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mt-3">¿Eliminar servicio?</h3>
+                    <p class="mt-2 text-sm text-gray-500">Esta acción eliminará permanentemente el servicio. ¿Estás
+                        seguro?</p>
+                    <div class="mt-5 flex justify-center space-x-4">
+                        <button wire:click="$set('showConfirmModal', false)" type="button"
+                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700 bg-white hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button wire:click="forceDelete" type="button"
+                            class="px-4 py-2 rounded-md text-sm text-white bg-red-600 hover:bg-red-700">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- MODAL: Advertencia de dependencias -->
+    @if ($showDependenciesWarning)
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white w-full max-w-md mx-4 rounded-lg p-6 shadow-xl">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                        <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mt-3">¡Advertencia!</h3>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Este servicio está asociado a <strong>{{ $dependenciesCount }}</strong> ventas.
+                        Si lo eliminas, estas ventas perderán la referencia.
+                    </p>
+                    <div class="mt-5 flex justify-center space-x-4">
+                        <button wire:click="$set('showDependenciesWarning', false)" type="button"
+                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700 bg-white hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button wire:click="forceDelete" type="button"
+                            class="px-4 py-2 rounded-md text-sm text-white bg-red-600 hover:bg-red-700">
+                            Eliminar de todos modos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-6">
+        <!-- Título y descripción -->
+        <div class="flex-1 min-w-0">
+            <h1 class="text-2xl font-bold text-gray-800">Gestor de Servicios</h1>
+            <p class="text-sm text-gray-600 mt-1">Administra los servicios que ofreces a tus clientes</p>
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <div class="w-full sm:w-auto flex-1 max-w-md">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <input type="text" wire:model.debounce.300ms="searchTerm" wire:keydown.debounce.300ms="resetPage"
+                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder="Buscar servicios...">
+            </div>
+        </div>
+
+        <!-- Botón Nuevo Servicio -->
+        <div class="w-full sm:w-auto">
+            <button wire:click="create"
+                class="w-full sm:w-auto flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 shadow-sm">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Nuevo Servicio
+            </button>
+        </div>
     </div>
 
-    <!-- Button to create a new service -->
-    <div class="text-center mb-8">
-        <button wire:click="create" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md">
-            Crear Nuevo Servicio
-        </button>
-    </div>
 
-    <!-- Search Field -->
-    <div class="mb-6">
-        <input type="text" wire:model="searchTerm" wire:keydown.debounce.300ms="resetPage"
-            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3"
-            placeholder="Buscar servicios...">
-    </div>
 
     @if ($isOpen)
         @include('livewire.service-modal')
     @endif
 
-    <!-- Services Table -->
-    <div class="overflow-x-auto bg-white shadow-md rounded-lg mt-6">
-        <table class="min-w-full bg-white border border-gray-300 shadow-md rounded-lg overflow-hidden">
-            <thead class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white">
-                <tr>
-                    @foreach (['Nombre', 'Precio', 'Acciones'] as $header)
-                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">
-                            {{ $header }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody class="bg-white">
-                @forelse ($services as $service)
-                    <tr class="border-b hover:bg-gray-100">
-                        <td class="px-4 py-3">{{ $service->name }}</td>
-                        <td class="px-4 py-3">${{ number_format($service->price, 2) }}</td>
-                        <td class="px-4 py-3 flex gap-2">
-                            <button wire:click="edit({{ $service->id }})"
-                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md">
-                                <svg class="feather feather-edit w-5 h-5" fill="none" height="24"
-                                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" viewBox="0 0 24 24" width="24"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                </svg>
-                            </button>
-                            <button wire:click="confirmDelete({{ $service->id }})"
-                                class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                @empty
+    <!-- Tabla de servicios -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <td colspan="3" class="px-4 py-3 text-center">No se encontraron servicios.</td>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Nombre
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Descripción
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Precio
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Acciones
+                        </th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="mt-6">
-        {{ $services->links() }}
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse ($services as $service)
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="font-medium text-gray-900">{{ $service->name }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-gray-600 text-sm line-clamp-2">
+                                    {{ $service->description ?? 'Sin descripción' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    S/.{{ number_format($service->price, 2) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end space-x-2">
+                                    <button wire:click="edit({{ $service->id }})"
+                                        class="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-50"
+                                        title="Editar">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                    <button wire:click="confirmDelete({{ $service->id }})"
+                                        class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
+                                        title="Eliminar">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                No se encontraron servicios. Crea tu primer servicio haciendo clic en "Nuevo Servicio".
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
+            {{ $services->links() }}
+        </div>
     </div>
 </div>

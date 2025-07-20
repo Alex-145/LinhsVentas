@@ -40,6 +40,12 @@
 
         <div wire:poll.5s="checkPendingSales">
             <!-- Botón de notificación -->
+
+            <a href="{{ route('predicciones') }}"
+                class="p-2 rounded-full hover:bg-gray-100 relative sm:p-1 text-blue-600 inline-flex items-center justify-center">
+                <i class="fas fa-robot text-lg"></i> {{-- O puedes usar fa-brain --}}
+            </a>
+
             <button @click="open = !open; $dispatch('close-user-modal')"
                 class="p-2 rounded-full hover:bg-gray-100 relative sm:p-1"
                 :class="{ 'bg-red-100': @js($hasNotifications), 'hover:bg-gray-100': !@js($hasNotifications) }">
@@ -57,12 +63,13 @@
 
 
             <!-- Modal de notificación -->
+            <!-- Modal de notificación -->
             <div x-show="open" @click.away="open = false"
                 class="absolute z-50 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 right-40 w-72">
                 <h3 class="text-lg font-semibold text-gray-800">Notificaciones</h3>
 
-                @if ($hasPending || $lowStockProducts->isNotEmpty())
-                    <!-- Notificación de facturas pendientes -->
+                @if ($hasNotifications)
+                    {{-- Notificación de facturas pendientes --}}
                     @if ($hasPending)
                         <div class="mt-2 cursor-pointer hover:bg-gray-100 p-4 rounded-lg"
                             wire:click="navegar('sales.index')">
@@ -70,7 +77,7 @@
                         </div>
                     @endif
 
-                    <!-- Notificación de productos con bajo stock -->
+                    {{-- Notificación de productos con bajo stock --}}
                     @if ($lowStockProducts->isNotEmpty())
                         <div class="mt-4 cursor-pointer hover:bg-gray-100 p-4 rounded-lg"
                             onclick="window.location.href='{{ route('lowstock.index') }}'">
@@ -83,10 +90,17 @@
                                 @endforeach
                             </ul>
                         </div>
+                    @endif
 
+                    {{-- Notificación de pagos por verificar --}}
+                    @if ($hasVerificacionPendiente)
+                        <div class="mt-2 cursor-pointer hover:bg-gray-100 p-4 rounded-lg"
+                            onclick="window.location.href='{{ route('ventas-online.index') }}'">
+                            <span class="text-sm text-gray-700">Tienes pagos por verificar.</span>
+                        </div>
                     @endif
                 @else
-                    <!-- No hay notificaciones -->
+                    {{-- No hay notificaciones --}}
                     <div class="mt-4">
                         <span class="text-sm text-gray-500">No tienes notificaciones.</span>
                     </div>
@@ -94,6 +108,7 @@
 
                 <button @click="open = false" class="mt-4 text-sm text-gray-600 hover:text-gray-800">Cerrar</button>
             </div>
+
 
         </div>
 
@@ -130,24 +145,23 @@
 </header>
 
 <script>
-    let hasPlayed = false;
+    document.addEventListener('livewire:init', () => {
+        let notificationSoundCooldown = false;
 
-    window.addEventListener('play-notification-sound', () => {
-        if (!hasPlayed) {
+        Livewire.on('play-notification-sound', () => {
+            if (notificationSoundCooldown) return;
+
             const audio = new Audio('/storage/audio/audionoti.mp3');
             audio.volume = 1.0;
             audio.play().catch(error => {
                 console.error("Error al reproducir el sonido: ", error);
             });
-            hasPlayed = true;
 
+            // Establecer un cooldown de 30 segundos
+            notificationSoundCooldown = true;
             setTimeout(() => {
-                hasPlayed = false;
-            }, 10000);
-        }
-    });
-
-    window.addEventListener('popstate', () => {
-        hasPlayed = false;
+                notificationSoundCooldown = false;
+            }, 30000);
+        });
     });
 </script>

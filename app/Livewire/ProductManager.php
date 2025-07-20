@@ -120,8 +120,12 @@ class ProductManager extends Component
         $products = Product::with('brand.category')  // Eager loading de 'brand' y 'category'
             ->orderBy('created_at', 'desc')
             ->when($this->searchTerm, function ($query) {
-                $query->where('name', 'like', '%' . addslashes($this->searchTerm) . '%');
+                $keywords = preg_split('/\s+/', trim($this->searchTerm));
+                foreach ($keywords as $word) {
+                    $query->where('name', 'like', '%' . $word . '%');
+                }
             })
+
             ->paginate(15);
 
         foreach ($products as $product) {

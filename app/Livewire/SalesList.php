@@ -54,6 +54,40 @@ class SalesList extends Component
         }
     }
 
+
+    public function exportSalesReport()
+    {
+        $sales = $this->getFilteredSales();
+
+        $pdf = Pdf::loadView('pdf.sales-detail-report', [
+            'sales' => $sales,
+            'startDate' => $this->startDate,
+            'endDate' => $this->endDate,
+            'totalGains' => $this->calculateTotalGains(),
+            'totalSales' => $this->calculateTotalSales(),
+            'filterStatus' => $this->getCurrentFilterStatus()
+        ])->setPaper('a4', 'landscape');
+
+        return response()->streamDownload(
+            fn() => print($pdf->stream()),
+            'reporte_detallado_ventas_' . now()->format('Y-m-d') . '.pdf'
+        );
+    }
+
+    protected function getCurrentFilterStatus()
+    {
+        if ($this->filterFacturado && !$this->filterPendienteFacturacion && !$this->filterNoAplicable) {
+            return 'Facturadas';
+        } elseif ($this->filterPendienteFacturacion && !$this->filterFacturado && !$this->filterNoAplicable) {
+            return 'Pendientes de Facturación';
+        } elseif ($this->filterNoAplicable && !$this->filterFacturado && !$this->filterPendienteFacturacion) {
+            return 'No Aplicables';
+        } elseif ($this->isPendienteFacturacion) {
+            return 'Pendientes de Facturación';
+        }
+        return 'Todas';
+    }
+
     public function loadSales()
     {
         $query = Sale::with(['client', 'user', 'saleDetails' => function ($query) {

@@ -6,20 +6,27 @@ use App\Models\Brand;
 use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class BrandCrud extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     public $name, $category_id, $brandId;
     public $categories;
-    public $brands = [];
     public $openForm = false;
     public $brandToDelete = null;
     public $openDeleteConfirm = false;
     public $url_imgbrand, $url_imgbrand_old;
     public $photoModalOpen = false;
     public $menuAbierto = true;
+    public $relatedProductsCount = 0;
+    public $brandNameToDelete = '';
+
+    // Propiedades para búsqueda y filtrado
+    public $search = '';
+    public $categoryFilter = '';
+
     public function updateMenuState()
     {
         $this->menuAbierto = !$this->menuAbierto;
@@ -29,18 +36,36 @@ class BrandCrud extends Component
 
     public function mount()
     {
-        $this->loadBrands();
-    }
-
-    public function loadBrands()
-    {
         $this->categories = Category::all();
-        $this->brands = Brand::with('category')->get();
     }
 
     public function render()
     {
-        return view('livewire.brand-crud')->layout('layouts.app');
+        $brands = Brand::query()
+            ->with(['category', 'products'])
+            ->when($this->search, function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%');
+            })
+            ->when($this->categoryFilter, function ($query) {
+                $query->where('category_id', $this->categoryFilter);
+            })
+            ->withCount('products')
+            ->orderBy('name')
+            ->paginate(10);
+
+        return view('livewire.brand-crud', [
+            'brands' => $brands
+        ])->layout('layouts.app');
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingCategoryFilter()
+    {
+        $this->resetPage();
     }
 
     public function openPhotoModal($id)
@@ -66,7 +91,6 @@ class BrandCrud extends Component
 
         session()->flash('message', 'Foto actualizada correctamente.');
         $this->photoModalOpen = false;
-        $this->loadBrands();
     }
 
     public function save()
@@ -96,7 +120,6 @@ class BrandCrud extends Component
             session()->flash('message', 'Marca creada con éxito.');
         }
 
-        $this->loadBrands();
         $this->reset(['name', 'category_id', 'brandId', 'url_imgbrand']);
         $this->openForm = false;
     }
@@ -116,20 +139,47 @@ class BrandCrud extends Component
         $this->openForm = true;
     }
 
+    public function prepareDelete($id)
+    {
+        $brand = Brand::withCount('products')->find($id);
+        $this->brandToDelete = $id;
+        $this->brandNameToDelete = $brand->name;
+        $this->relatedProductsCount = $brand->products_count;
+        $this->openDeleteConfirm = true;
+    }
+
     public function delete()
     {
         if ($this->brandToDelete) {
             $brand = Brand::find($this->brandToDelete);
+
             if ($brand) {
-                $brand->delete();
-                session()->flash('message', 'Marca eliminada con éxito.');
+                if ($brand->products()->exists()) {
+                    session()->flash('error', 'No se puede eliminar la marca porque tiene productos asociados.');
+                } else {
+                    $brand->delete();
+                    session()->flash('message', 'Marca eliminada con éxito.');
+                }
             } else {
-                session()->flash('message', 'Marca no encontrada.');
+                session()->flash('error', 'Marca no encontrada.');
             }
 
-            $this->loadBrands();
-            $this->brandToDelete = null;
-            $this->openDeleteConfirm = false;
+            $this->resetDeleteConfirmation();
         }
+    }
+
+    public function resetDeleteConfirmation()
+    {
+        $this->brandToDelete = null;
+        $this->brandNameToDelete = '';
+        $this->relatedProductsCount = 0;
+        $this->openDeleteConfirm = false;
+    }
+
+    public function closeModal()
+    {
+        $this->openForm = false;
+        $this->photoModalOpen = false;
+        $this->openDeleteConfirm = false;
     }
 }

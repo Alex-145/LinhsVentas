@@ -18,16 +18,17 @@
         <!-- Botón de filtros -->
         <div class="flex justify-end space-x-4">
             @if (!$isPendienteFacturacion)
-    <button wire:click="openModal"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
-        Filtros
-    </button>
-@endif
+                <button wire:click="openModal"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                    Filtros
+                </button>
+            @endif
 
             <a href="https://api-seguridad.sunat.gob.pe/v1/clientessol/4f3b88b3-d9d6-402a-b85d-6a0bc857746a/oauth2/loginMenuSol?lang=es-PE&showDni=true&showLanguages=false&originalUrl=https://e-menu.sunat.gob.pe/cl-ti-itmenu/AutenticaMenuInternet.htm&state=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAADdAAEZXhlY3B0AAZwYXJhbXN0AEsqJiomL2NsLXRpLWl0bWVudS9NZW51SW50ZXJuZXQuaHRtJmI2NGQyNmE4YjVhZjA5MTkyM2IyM2I2NDA3YTFjMWRiNDFlNzMzYTZ0AANleGVweA=="
                 target="_blank"
                 class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md flex items-center space-x-2 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 <span>SUNAT</span>
@@ -53,7 +54,7 @@
                 <table class="min-w-full bg-white border border-gray-300 shadow-md rounded-lg overflow-hidden">
                     <thead class="bg-gray-100">
                         <tr>
-                            @foreach (['Fecha de Venta' => 'sale_date', 'Día de la Semana' => 'sale_date', 'Usuario' => 'user.name', 'Cliente' => 'client.name', 'Total' => 'total', 'Utilidad' => 'utilidad_sale', 'Estado de la Factura' => 'status_fac', 'Acciones' => ''] as $label => $field)
+                            @foreach (['ID' => 'id', 'Fecha de Venta' => 'sale_date', 'Día de la Semana' => 'sale_date', 'Usuario' => 'user.name', 'Cliente' => 'client.name', 'Total' => 'total', 'Utilidad' => 'utilidad_sale', 'Estado de la Factura' => 'status_fac', 'Acciones' => ''] as $label => $field)
                                 <th
                                     class="py-3 px-4 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {{ $label }}
@@ -65,15 +66,23 @@
                         <tr class="cursor-pointer hover:bg-gray-50 transition-colors duration-200"
                             wire:key="sale-{{ $sale->id }}">
                             <td class="py-3 px-4 border-b" wire:click="selectSale({{ $sale->id }})">
-                                {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y') }}</td>
+                                {{ $sale->id }}
+                            </td>
                             <td class="py-3 px-4 border-b" wire:click="selectSale({{ $sale->id }})">
-                                {{ \Carbon\Carbon::parse($sale->sale_date)->isoFormat('dddd') }}</td>
+                                {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y') }}
+                            </td>
                             <td class="py-3 px-4 border-b" wire:click="selectSale({{ $sale->id }})">
-                                {{ $sale->user->name }}</td>
+                                {{ \Carbon\Carbon::parse($sale->sale_date)->isoFormat('dddd') }}
+                            </td>
                             <td class="py-3 px-4 border-b" wire:click="selectSale({{ $sale->id }})">
-                                {{ $sale->client->name }}</td>
+                                {{ $sale->user->name }}
+                            </td>
                             <td class="py-3 px-4 border-b" wire:click="selectSale({{ $sale->id }})">
-                                {{ number_format($sale->total, 2) }}</td>
+                                {{ $sale->client->name }}
+                            </td>
+                            <td class="py-3 px-4 border-b" wire:click="selectSale({{ $sale->id }})">
+                                {{ number_format($sale->total, 2) }}
+                            </td>
                             <td class="py-3 px-4 border-b bg-green-100 text-green-800 font-semibold"
                                 wire:click="selectSale({{ $sale->id }})">
                                 {{ number_format($sale->utilidad_sale, 2) }}
@@ -103,7 +112,8 @@
                                             <i class="fas fa-info-circle"></i>
                                         </button>
                                     @elseif ($sale->status_fac === 'no_aplicable')
-                                        <button wire:click="confirmStatusChange({{ $sale->id }}, 'pendiente_facturacion')"
+                                        <button
+                                            wire:click="confirmStatusChange({{ $sale->id }}, 'pendiente_facturacion')"
                                             class="text-green-600 hover:text-green-900 transition-colors duration-200"
                                             title="Cambiar a Pendiente Facturación">
                                             <i class="fas fa-sync-alt"></i>
@@ -122,21 +132,18 @@
                                     </button>
                                 </div>
                             </td>
-
-
-
                         </tr>
 
                         @if ($selectedSale === $sale->id)
                             <tr>
-                                <td colspan="7">
+                                <td colspan="9">
                                     <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
                                         <h3 class="font-bold text-lg mb-4">Detalles de la Venta</h3>
                                         <table
                                             class="min-w-full bg-white border border-gray-300 shadow-sm rounded-lg overflow-hidden">
                                             <thead class="bg-gray-100">
                                                 <tr>
-                                                    @foreach (['Producto' => 'product.name', 'Cantidad' => 'quantity', 'Precio' => 'price', 'Subtotal' => 'subtotal', 'Utilidad' => 'utilidad_saledetail'] as $label => $field)
+                                                    @foreach (['ID' => 'id', 'Producto' => 'product.name', 'Cantidad' => 'quantity', 'Precio' => 'price', 'Subtotal' => 'subtotal', 'Utilidad' => 'utilidad_saledetail'] as $label => $field)
                                                         <th
                                                             class="py-2 px-4 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                             {{ $label }}
@@ -152,13 +159,15 @@
                                                 @foreach ($sale->saleDetails as $detail)
                                                     <tr class="hover:bg-gray-50">
                                                         <td class="py-2 px-4 border-b">
+                                                            {{ $detail->id }}
+                                                        </td>
+                                                        <td class="py-2 px-4 border-b">
                                                             @if ($detail->salable instanceof App\Models\Product || $detail->salable instanceof App\Models\Service)
                                                                 {{ $detail->salable->name }}
                                                             @else
                                                                 No disponible
                                                             @endif
                                                         </td>
-
                                                         <td class="py-2 px-4 border-b">{{ $detail->quantity }}</td>
                                                         <td class="py-2 px-4 border-b">
                                                             {{ number_format($detail->price, 2) }}</td>
@@ -196,8 +205,8 @@
         @empty
             <p class="mt-8 text-lg text-gray-600">No hay ventas registradas.</p>
         @endforelse
-
     </div>
+
 
     <div x-data="{ open: @entangle('showDeleteConfirmationde') }" x-show="open"
         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
@@ -253,7 +262,15 @@
             </div>
         </div>
     @endif
-
+    <button wire:click="exportSalesReport"
+        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md flex items-center space-x-2 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span>Exportar Detalle Completo</span>
+    </button>
     @if ($selectedClient)
         <div class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 z-50">
             <div class="bg-white p-8 rounded-lg shadow-xl">

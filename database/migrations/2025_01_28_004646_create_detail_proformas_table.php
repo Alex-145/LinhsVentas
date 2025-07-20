@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('detail_proformas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('proforma_id')->constrained('proformas')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('price', 15, 2);
             $table->decimal('subtotal', 15, 2);
-            $table->decimal('utilidad_saledetail', 15, 2);
             $table->timestamps();
         });
     }

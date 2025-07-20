@@ -42,34 +42,45 @@ class ClientManager extends Component
 
     public function buscarDni()
     {
-        if ($this->dni && strlen($this->dni) === 8 && is_numeric($this->dni)) {
+        $this->validate(['dni' => 'required|digits:8|numeric']);
+
+        try {
             $persona = SunatService::buscarPorDni($this->dni);
 
-            if ($persona && isset($persona['nombres'])) {
-                $this->name = $persona['nombres'] . ' ' . $persona['apellidoPaterno'] . ' ' . $persona['apellidoMaterno'];
-                session()->flash('message', 'Nombre autocompletado desde RENIEC.');
-            } else {
-                session()->flash('message', 'No se encontró información para el DNI ingresado.');
+            if (!$persona) {
+                throw new \Exception('No se pudo conectar con el servicio RENIEC');
             }
-        } else {
-            session()->flash('message', 'Ingrese un DNI válido de 8 dígitos.');
+
+            if (isset($persona['nombres'])) {
+                $this->name = trim("{$persona['nombres']} {$persona['apellidoPaterno']} {$persona['apellidoMaterno']}");
+                $this->dispatch('notify', 'Nombre autocompletado desde RENIEC');
+            } else {
+                $this->addError('dni', 'No se encontró información para este DNI');
+            }
+        } catch (\Exception $e) {
+            $this->addError('dni', 'Error al consultar RENIEC: ' . $e->getMessage());
         }
     }
 
     public function buscarRuc()
     {
-        if ($this->ruc && strlen($this->ruc) === 11 && is_numeric($this->ruc)) {
+        $this->validate(['ruc' => 'required|digits:11|numeric']);
+
+        try {
             $empresa = SunatService::buscarPorRuc($this->ruc);
 
-            if ($empresa && isset($empresa['razonSocial'])) {
-                $this->business_name = $empresa['razonSocial'];
-                $this->name = $empresa['razonSocial']; // opcional
-                session()->flash('message', 'Razón Social autocompletada desde SUNAT.');
-            } else {
-                session()->flash('message', 'No se encontró información para el RUC ingresado.');
+            if (!$empresa) {
+                throw new \Exception('No se pudo conectar con el servicio SUNAT');
             }
-        } else {
-            session()->flash('message', 'Ingrese un RUC válido de 11 dígitos.');
+
+            if (isset($empresa['razonSocial'])) {
+                $this->business_name = $empresa['razonSocial'];
+                $this->dispatch('notify', 'Razón Social autocompletada desde SUNAT.');
+            } else {
+                $this->addError('ruc', 'No se encontró información para este RUC');
+            }
+        } catch (\Exception $e) {
+            $this->addError('ruc', 'Error al consultar SUNAT: ' . $e->getMessage());
         }
     }
     public function create()

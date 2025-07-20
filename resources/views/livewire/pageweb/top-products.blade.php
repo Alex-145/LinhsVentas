@@ -1,54 +1,88 @@
 <section class="py-16">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-8">Productos Más Vendidos</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            @foreach($topProducts as $product)
-                @if($product) <!-- Verificamos si el producto existe -->
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                        @if ($product->photo_url) <!-- Verificamos si existe una foto para el producto -->
-                            <img src="{{ asset('storage/' . $product->photo_url) }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
-                        @else
-                            <!-- Si no hay foto, podemos mostrar una imagen predeterminada o dejar en blanco -->
-                            <img src="{{ asset('storage/default-image.jpg') }}" alt="Producto sin imagen" class="w-full h-48 object-cover">
-                        @endif
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-8">Productos Más Vendidos</h2>
 
-                        <div class="p-4">
-                            <h3 class="text-lg font-semibold mb-2">{{ $product->name }}</h3>
+        <!-- Carrusel de productos con botones -->
+        <div class="relative group" x-data="{ scrollEl: null }" x-init="scrollEl = $refs.scrollContainer">
+            <!-- Botón izquierda mejorado -->
+            <button @click="scrollEl.scrollBy({ left: -300, behavior: 'smooth' })"
+                class="absolute left-0 top-1/2 transform -translate-y-1/2 z-10
+       bg-gradient-to-l from-blue-600 via-blue-700 to-blue-800
+       text-white p-3 rounded-full shadow-lg
+       hover:from-blue-500 hover:to-blue-700
+       hover:shadow-2xl hover:scale-110 transition-all duration-300
+       ring-2 ring-white/10 backdrop-blur-sm
+       focus:outline-none hidden md:block group">
 
-                            @if ($product->brand)
-                                <p class="text-gray-600 text-sm flex items-center gap-2">
-                                    <i class="fas fa-industry text-gray-500"></i> Marca: {{ $product->brand->name }}
-                                </p>
-                            @endif
+                <i class="fas fa-chevron-left text-xl group-hover:animate-pulse"></i>
+            </button>
 
-                            <p class="text-gray-700 mt-2">{{ $product->description }}</p>
 
-                            @if ($product->stock > 0)
-                                <p class="text-green-600 mt-2 flex items-center gap-2">
-                                    <i class="fas fa-box text-green-500"></i> Stock disponible: {{ $product->stock }}
-                                </p>
-                                <div class="flex items-center justify-between mt-4">
-                                    <span class="text-2xl font-bold text-blue-600 flex items-center gap-2">
-                                        S/.{{ number_format($product->sale_price, 2) }}
-                                    </span>
-                                </div>
+            <!-- Carrusel -->
+            <div x-ref="scrollContainer"
+                class="flex overflow-x-auto space-x-6 scrollbar-hide scroll-smooth snap-x snap-mandatory pb-4 px-1"
+                style="scrollbar-width: none;">
+                @foreach ($topProducts as $product)
+                    @if ($product)
+                        <a href="{{ url('/wproductshow/' . $product->id) }}"
+                            class="min-w-[250px] max-w-[250px] bg-white rounded-xl shadow-lg snap-start hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex-shrink-0">
+                            @if ($product->photo_url)
+                                <img src="{{ asset('storage/' . $product->photo_url) }}" alt="{{ $product->name }}"
+                                    class="w-full h-40 object-cover rounded-t-xl">
                             @else
-                                <p class="text-red-600 font-bold mt-2 flex items-center gap-2">
-                                    <i class="fas fa-exclamation-circle text-red-500"></i> Producto agotado
-                                </p>
+                                <img src="{{ asset('storage/default-image.jpg') }}" alt="Producto sin imagen"
+                                    class="w-full h-40 object-cover rounded-t-xl">
                             @endif
 
-                            <!-- Botón de añadir al carrito -->
-                            <button wire:click="addToCart"
-                                class="w-full mt-4 px-4 py-2 rounded-full font-semibold text-white transition-all duration-300
-                                {{ isset($cart[$product->id]) ? 'bg-gray-500 hover:bg-gray-600' : 'bg-green-500 hover:bg-green-600' }}">
-                                <i class="fas fa-cart-plus"></i>
-                                {{ isset($cart[$product->id]) ? 'Añadir uno más' : 'Añadir al carrito' }}
-                            </button>
-                        </div>
-                    </div>
-                @endif
-            @endforeach
+                            <div class="p-4 text-left">
+                                <h3 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h3>
+
+                                @if ($product->brand)
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        <i class="fas fa-industry text-gray-400 mr-1"></i>{{ $product->brand->name }}
+                                    </p>
+                                @endif
+
+                                <p class="text-gray-600 mt-2 text-sm">
+                                    {{ Str::limit($product->description, 60) }}
+                                </p>
+
+                                @if ($product->stock > 0)
+                                    <p class="text-green-600 mt-2 text-sm flex items-center gap-1">
+                                        <i class="fas fa-box"></i> {{ $product->stock }} en stock
+                                    </p>
+                                    <p class="text-blue-600 font-bold text-lg mt-1">
+                                        S/.{{ number_format($product->sale_price, 2) }}
+                                    </p>
+                                @else
+                                    <p class="text-red-600 font-bold mt-2 text-sm">
+                                        <i class="fas fa-exclamation-circle"></i> Agotado
+                                    </p>
+                                @endif
+                            </div>
+                        </a>
+                    @endif
+                @endforeach
+            </div>
+
+            <!-- Botón derecha mejorado -->
+            <button @click="scrollEl.scrollBy({ left: 300, behavior: 'smooth' })"
+                class="absolute right-0 top-1/2 transform -translate-y-1/2 z-10
+       bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800
+       text-white p-3 rounded-full shadow-lg
+       hover:from-blue-500 hover:to-blue-700
+       hover:shadow-2xl hover:scale-110 transition-all duration-300
+       ring-2 ring-white/10 backdrop-blur-sm
+       focus:outline-none hidden md:block group">
+
+                <i class="fas fa-chevron-right text-xl group-hover:animate-pulse"></i>
+            </button>
+
+
+            <!-- Indicador para pantallas pequeñas -->
+            <div class="mt-4 text-center md:hidden text-gray-500 text-sm">
+                Desliza para ver más →
+            </div>
         </div>
     </div>
 </section>

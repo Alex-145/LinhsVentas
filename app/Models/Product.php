@@ -51,4 +51,8 @@ class Product extends Model
     {
         return $this->hasMany(StockEntryDetail::class);
     }
+    public function proformaDetails()
+    {
+        return $this->hasMany(ProformaDetail::class);
+    }
 }
