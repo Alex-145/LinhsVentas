@@ -36,17 +36,15 @@
         </h2>
     </div>
 
-    <div class="flex items-center gap-4 sm:gap-2" x-data="{ open: false }">
-
-        <div wire:poll.5s="checkPendingSales">
+    <div class="flex items-center gap-4 sm:gap-2">
+        <div wire:poll.5s="checkPendingSales" x-data="{ notificationOpen: false }">
             <!-- Botón de notificación -->
-
             <a href="{{ route('predicciones') }}"
                 class="p-2 rounded-full hover:bg-gray-100 relative sm:p-1 text-blue-600 inline-flex items-center justify-center">
-                <i class="fas fa-robot text-lg"></i> {{-- O puedes usar fa-brain --}}
+                <i class="fas fa-robot text-lg"></i>
             </a>
 
-            <button @click="open = !open; $dispatch('close-user-modal')"
+            <button @click="notificationOpen = !notificationOpen; $dispatch('close-user-modal')"
                 class="p-2 rounded-full hover:bg-gray-100 relative sm:p-1"
                 :class="{ 'bg-red-100': @js($hasNotifications), 'hover:bg-gray-100': !@js($hasNotifications) }">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -60,11 +58,8 @@
                 @endif
             </button>
 
-
-
             <!-- Modal de notificación -->
-            <!-- Modal de notificación -->
-            <div x-show="open" @click.away="open = false"
+            <div x-show="notificationOpen" @click.away="notificationOpen = false"
                 class="absolute z-50 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 right-40 w-72">
                 <h3 class="text-lg font-semibold text-gray-800">Notificaciones</h3>
 
@@ -106,17 +101,16 @@
                     </div>
                 @endif
 
-                <button @click="open = false" class="mt-4 text-sm text-gray-600 hover:text-gray-800">Cerrar</button>
+                <button @click="notificationOpen = false"
+                    class="mt-4 text-sm text-gray-600 hover:text-gray-800">Cerrar</button>
             </div>
-
-
         </div>
 
-
-        <div>
+        <div x-data="{ userModalOpen: false }">
             <!-- Información del usuario -->
             <div class="relative">
-                <div class="flex items-center gap-3 cursor-pointer" wire:click="toggleModal">
+                <div class="flex items-center gap-3 cursor-pointer"
+                    @click="userModalOpen = !userModalOpen; $dispatch('close-notification-modal')">
                     <div class="text-right">
                         <div class="text-sm font-medium">{{ Auth::user()->name }}</div>
                         <div class="text-xs text-gray-500">Administrador</div>
@@ -126,7 +120,7 @@
                 </div>
 
                 <!-- Modal de usuario -->
-                <div x-data="{ open: @entangle('open') }" x-show="open" @click.away="open = false"
+                <div x-show="userModalOpen" @click.away="userModalOpen = false"
                     class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
                     <div class="block px-4 py-2 text-xs text-gray-400">{{ __('Manage Account') }}</div>
                     <a href="{{ route('profile.show') }}"
@@ -162,6 +156,24 @@
             setTimeout(() => {
                 notificationSoundCooldown = false;
             }, 30000);
+        });
+
+        // Eventos para cerrar modales cuando se abre el otro
+        document.addEventListener('close-user-modal', () => {
+            const userModal = document.querySelector('[x-data*="userModalOpen"]').__x.$data
+                .userModalOpen;
+            if (userModal) {
+                document.querySelector('[x-data*="userModalOpen"]').__x.$data.userModalOpen = false;
+            }
+        });
+
+        document.addEventListener('close-notification-modal', () => {
+            const notificationModal = document.querySelector('[x-data*="notificationOpen"]').__x.$data
+                .notificationOpen;
+            if (notificationModal) {
+                document.querySelector('[x-data*="notificationOpen"]').__x.$data.notificationOpen =
+                    false;
+            }
         });
     });
 </script>
