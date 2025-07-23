@@ -1,9 +1,8 @@
-<div
-    class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-8 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-2xl rounded-2xl transition-all duration-300 ease-in-out">
+<div>
     <form wire:submit.prevent="obtenerPrediccion" class="space-y-6">
         <!-- Sección de búsqueda de producto -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            <!-- Buscador de productos mejorado -->
+            <!-- Buscador de productos -->
             <div class="relative z-0 w-full group">
                 <label for="productSearch" class="block text-sm font-medium text-gray-700 mb-1">Buscar Producto</label>
                 <div class="relative mt-1">
@@ -63,7 +62,7 @@
                 @enderror
             </div>
 
-            <!-- Campo Año mejorado -->
+            <!-- Campo Año -->
             <div class="relative">
                 <label for="anio" class="block text-sm font-medium text-gray-700 mb-1">Año</label>
                 <div class="relative">
@@ -87,7 +86,7 @@
                 @enderror
             </div>
 
-            <!-- Campo Mes Inicio mejorado -->
+            <!-- Campo Mes Inicio -->
             <div class="relative">
                 <label for="mesInicio" class="block text-sm font-medium text-gray-700 mb-1">Mes Inicio</label>
                 <select wire:model="mesInicio" id="mesInicio"
@@ -110,7 +109,7 @@
                 @enderror
             </div>
 
-            <!-- Campo Meses a predecir mejorado -->
+            <!-- Campo Meses a predecir -->
             <div class="relative">
                 <label for="meses" class="block text-sm font-medium text-gray-700 mb-1">Meses a predecir</label>
                 <div class="relative">
@@ -187,106 +186,28 @@
             </div>
         @endif
 
-        @if (!empty($predicciones))
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <!-- Demanda promedio -->
-                <div class="bg-white p-4 rounded-lg shadow border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500">Demanda Promedio</h3>
-                    <p class="mt-1 text-2xl font-semibold text-indigo-600">
-                        {{ number_format(array_sum(array_column($predicciones, 'demanda')) / count($predicciones), 2) }}
-                    </p>
-                </div>
-
-                <!-- Máxima demanda -->
-                <div class="bg-white p-4 rounded-lg shadow border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500">Máxima Demanda</h3>
-                    <p class="mt-1 text-2xl font-semibold text-red-600">
-                        {{ max(array_column($predicciones, 'demanda')) }}
-                        <span class="text-sm font-normal text-gray-500">
-                            (Mes:
-                            {{ $predicciones[array_search(max(array_column($predicciones, 'demanda')), array_column($predicciones, 'demanda'))]['mes'] }})
-                        </span>
-                    </p>
-                </div>
-
-                <!-- Tendencia general -->
-                <div class="bg-white p-4 rounded-lg shadow border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500">Tendencia General</h3>
-                    @php
-                        $first = (float) $predicciones[0]['demanda'];
-                        $last = (float) $predicciones[count($predicciones) - 1]['demanda'];
-                        $trend = (($last - $first) / $first) * 100;
-                    @endphp
-                    <p class="mt-1 text-2xl font-semibold {{ $trend >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                        {{ round($trend, 2) }}%
-                        @if ($trend >= 0)
-                            <span class="text-green-500">▲</span>
-                        @else
-                            <span class="text-red-500">▼</span>
-                        @endif
-                    </p>
-                </div>
-            </div>
-        @endif
-        <!-- Loading state -->
-        @if ($cargando)
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                    <div class="flex items-center justify-center space-x-2">
-                        <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        <span class="text-gray-700 font-medium">Calculando predicciones...</span>
-                    </div>
-                    <p class="mt-2 text-sm text-gray-500 text-center">Esto puede tomar unos segundos</p>
-                </div>
-            </div>
-        @endif
-
-        <!-- Error handling -->
-        @if ($errorApi)
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700">{{ $errorApi }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <!-- Resultados de predicción -->
+        <!-- Resultados -->
         @if (!empty($predicciones))
             <div class="mt-12">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-800">Resultados de Predicción</h2>
-                    <button wire:click="exportToExcel"
-                        class="flex items-center text-sm text-green-600 hover:text-green-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Exportar a Excel
+                    <button wire:click="generateChart"
+                        class="flex items-center px-4 py-2 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg shadow-sm transition-all duration-200 ease-in-out">
+                        <i class="fas fa-chart-line text-green-600 mr-2"></i>
+                        <span class="text-sm font-medium text-green-700">Generar Gráfico</span>
                     </button>
                 </div>
 
+                <!-- Gráfico -->
+                <!-- Gráfico - Asegúrate de agregar wire:ignore -->
+                <div wire:ignore class="h-96 bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Tendencia de Demanda</h3>
+                    <canvas id="predictionChart"></canvas>
+                </div>
+                <!-- Tabla de resultados -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <!-- Cambia el encabezado de la tabla para ser más descriptivo -->
                             <thead class="bg-gradient-to-r from-indigo-600 to-blue-600">
                                 <tr>
                                     <th scope="col"
@@ -338,107 +259,167 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        @endif
 
-                <!-- Solo la parte del gráfico (puedes colocarlo donde necesites) -->
-                @if (!empty($predicciones) && count($predicciones) > 1)
-                    <div class="mt-8 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Gráfico de Tendencia</h3>
-                        <div wire:ignore class="h-64">
-                            <canvas id="predictionChart"></canvas>
-                        </div>
+        <!-- Loading state -->
+        @if ($cargando)
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <span class="text-gray-700 font-medium">Calculando predicciones...</span>
                     </div>
-
-                    @push('scripts')
-                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                        <script>
-                            document.addEventListener('livewire:load', function() {
-                                // Escuchar eventos de Livewire para actualizar el gráfico
-                                Livewire.on('prediccionesActualizadas', function(data) {
-                                    renderChart(data);
-                                });
-
-                                // Función para renderizar/actualizar el gráfico
-                                function renderChart(data) {
-                                    const ctx = document.getElementById('predictionChart').getContext('2d');
-                                    const labels = data.map(item => item.mes);
-                                    const values = data.map(item => item.demanda);
-
-                                    // Destruir el gráfico anterior si existe
-                                    if (window.predictionChart) {
-                                        window.predictionChart.destroy();
-                                    }
-
-                                    // Crear nuevo gráfico
-                                    window.predictionChart = new Chart(ctx, {
-                                        type: 'line',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                label: 'Demanda Estimada',
-                                                data: values,
-                                                borderColor: '#4f46e5',
-                                                backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                                                borderWidth: 2,
-                                                tension: 0.3,
-                                                fill: true
-                                            }]
-                                        },
-                                        // Modifica las opciones del gráfico para mejor visualización
-                                        options: {
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                                legend: {
-                                                    position: 'top',
-                                                },
-                                                tooltip: {
-                                                    mode: 'index',
-                                                    intersect: false,
-                                                    callbacks: {
-                                                        label: function(context) {
-                                                            let label = context.dataset.label || '';
-                                                            if (label) {
-                                                                label += ': ';
-                                                            }
-                                                            label += context.parsed.y.toFixed(2);
-                                                            return label;
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            scales: {
-                                                y: {
-                                                    beginAtZero: false,
-                                                    title: {
-                                                        display: true,
-                                                        text: 'Unidades Estimadas'
-                                                    }
-                                                },
-                                                x: {
-                                                    title: {
-                                                        display: true,
-                                                        text: 'Período'
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-
-                                // Renderizar gráfico inicial si hay datos
-                                @this.on('prediccionesActualizadas', (data) => {
-                                    renderChart(data);
-                                });
-
-                                // Opcional: Si ya hay datos al cargar la página
-                                @if (!empty($predicciones))
-                                    renderChart(@json($predicciones));
-                                @endif
-                            });
-                        </script>
-                    @endpush
-                @endif
+                    <p class="mt-2 text-sm text-gray-500 text-center">Esto puede tomar unos segundos</p>
+                </div>
             </div>
         @endif
     </form>
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('livewire:init', function() {
+                console.log('Livewire inicializado - configurando gráfico');
+
+                let predictionChart = null;
+                let chartInitialized = false;
+
+                // Función para inicializar el gráfico
+                function initializeChart() {
+                    const ctx = document.getElementById('predictionChart');
+
+                    if (!ctx) {
+                        console.error('Canvas no encontrado');
+                        return false;
+                    }
+
+                    // Destruir gráfico existente si hay uno
+                    if (predictionChart) {
+                        predictionChart.destroy();
+                    }
+
+                    console.log('Creando nuevo gráfico');
+                    predictionChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: [],
+                            datasets: []
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: (context) =>
+                                            `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    title: {
+                                        display: true,
+                                        text: 'Unidades Estimadas'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Período'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    chartInitialized = true;
+                    return true;
+                }
+
+                // Función para actualizar el gráfico con datos
+                function updateChart(data) {
+                    if (!chartInitialized && !initializeChart()) {
+                        console.error('No se pudo inicializar el gráfico');
+                        return;
+                    }
+
+                    console.log('Actualizando gráfico con datos:', data);
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        console.error('Datos no válidos para el gráfico');
+                        return;
+                    }
+
+                    // Preparar datos
+                    const labels = data.map(item => item.mes || '');
+                    const values = data.map(item => {
+                        const num = Number(item.valor_numerico);
+                        return isNaN(num) ? 0 : num;
+                    });
+
+                    // Actualizar datos del gráfico
+                    predictionChart.data.labels = labels;
+                    predictionChart.data.datasets = [{
+                        label: 'Demanda Estimada',
+                        data: values,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#4f46e5',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }];
+
+                    // Actualizar el gráfico con animación
+                    predictionChart.update('none'); // 'none' para actualización sin animación
+                }
+
+                // Manejador de eventos de Livewire
+                Livewire.on('prediccionesActualizadas', (event) => {
+                    console.log('Evento recibido:', event);
+
+                    // Manejar diferentes formatos de evento
+                    let dataToRender;
+
+                    if (Array.isArray(event)) {
+                        dataToRender = event;
+                    } else if (event?.predicciones) {
+                        dataToRender = event.predicciones;
+                    } else {
+                        console.error('Formato de evento no reconocido:', event);
+                        return;
+                    }
+
+                    updateChart(dataToRender);
+                });
+
+                // Inicializar el gráfico cuando el componente esté listo
+                Livewire.hook('component.initialized', (component) => {
+                    initializeChart();
+
+                    // Si hay datos iniciales, actualizar el gráfico
+                    if (component.serverMemo?.data?.predicciones) {
+                        updateChart(component.serverMemo.data.predicciones);
+                    }
+                });
+            });
+        </script>
+    @endpush
 </div>

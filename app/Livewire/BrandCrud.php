@@ -19,20 +19,12 @@ class BrandCrud extends Component
     public $openDeleteConfirm = false;
     public $url_imgbrand, $url_imgbrand_old;
     public $photoModalOpen = false;
-    public $menuAbierto = true;
     public $relatedProductsCount = 0;
     public $brandNameToDelete = '';
 
     // Propiedades para búsqueda y filtrado
     public $search = '';
     public $categoryFilter = '';
-
-    public function updateMenuState()
-    {
-        $this->menuAbierto = !$this->menuAbierto;
-    }
-
-    protected $listeners = ['toggleMenu' => 'updateMenuState'];
 
     public function mount()
     {

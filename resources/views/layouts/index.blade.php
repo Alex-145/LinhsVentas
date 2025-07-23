@@ -47,7 +47,11 @@
     <!-- Componente del carrito flotante -->
     @livewire('pageweb.carrito')
 
+    @stack('modals')
     @livewireScripts
+
+    {{-- ✅ Aquí se deben renderizar los scripts que empujas con @push --}}
+    @stack('scripts')
 
     <!-- Ícono flotante de WhatsApp -->
     <a href="https://wa.me/51983316063?text=Hola%2C%20estoy%20interesado%20en%20sus%20productos"

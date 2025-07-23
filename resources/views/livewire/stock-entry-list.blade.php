@@ -1,4 +1,4 @@
-<div class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-10 max-w-6xl mx-auto p-3 transition-all duration-300 ease-in-out">
+<div>
     <div class="container mx-auto space-y-6">
         <!-- Resumen de Compras -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

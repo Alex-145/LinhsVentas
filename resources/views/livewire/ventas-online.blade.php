@@ -1,5 +1,4 @@
-<div class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-6 transition-all duration-300 ease-in-out">
-    <!-- Header Section -->
+<div> <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 flex items-center">

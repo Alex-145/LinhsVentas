@@ -1,6 +1,4 @@
-<div
-    class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-full sm:max-w-7xl mx-auto p-6 transition-all duration-300 ease-in-out">
-    <!-- Notificación de éxito -->
+<div> <!-- Notificación de éxito -->
     @if (session()->has('message'))
         <div class="p-4 mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-sm animate-fade-in">
             <div class="flex items-center">

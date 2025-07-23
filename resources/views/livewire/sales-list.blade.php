@@ -1,5 +1,4 @@
-<div
-    class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-xl rounded-xl transition-all duration-300 ease-in-out">
+<div>
     <div class="flex space-x-4">
         <!-- Div de Ganancias Totales -->
         <div class="p-4 mb-4 bg-green-100 rounded-lg shadow-inner flex-1">

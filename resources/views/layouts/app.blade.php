@@ -6,54 +6,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Linhs Llantas | Panel Administrativo</title>
+    <!-- Título de la pestaña -->
+    <title>Linhs Llantas | Tu tienda de confianza</title>
+
+    <!-- Favicon (ícono de la pestaña) -->
     <link rel="icon" href="{{ asset('storage/pageweb/logopeque.png') }}" type="image/png">
 
-    <!-- Tipografía -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Estilos y Scripts (Vite) -->
+    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-
-    <!-- Estilos Livewire -->
     @livewireStyles
 </head>
 
-<body class="bg-gray-50 text-gray-900">
+<body class="font-sans antialiased bg-gray-100" x-data="{
+    menuAbierto: window.innerWidth > 768,
+    mobileSidebarOpen: false,
+    esMovil: window.innerWidth <= 768,
+    esDesktop: window.innerWidth > 768
+}"
+    @resize.window="
+        menuAbierto = window.innerWidth > 768;
+        esMovil = window.innerWidth <= 768;
+        esDesktop = window.innerWidth > 768;
+    ">
 
-    <!-- Layout Principal -->
-    <div class="flex h-screen">
+    <x-banner />
 
-        <!-- Navegación lateral -->
-        <aside>
-            @livewire('navigation-menudos')
-        </aside>
+    <!-- Menú (Sidebar) controlado por Livewire -->
+    @livewire('navigationmenudos')
 
-        <!-- Contenido principal -->
-        <main class="flex-1 flex flex-col">
+    <!-- Header Livewire (incluye desktop y móvil) -->
+    @livewire('header')
 
-            <!-- Encabezado superior -->
-            <header>
-                @livewire('header')
-            </header>
+    <!-- Contenedor principal -->
+    <div :class="menuAbierto && esDesktop ? 'md:ml-64 pt-20' : 'pt-20'" class="transition-all duration-300">
+        <main>
+            @if (isset($header))
+                <div class="bg-white shadow mb-4">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </div>
+            @endif
 
-            <!-- Slot dinámico -->
-            <section class="p-4 flex-1 overflow-y-auto">
-                {{ $slot }}
-            </section>
-
+            <div class="py-12">
+                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    {{ $slot }}
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Modales -->
     @stack('modals')
-
-    <!-- Scripts Livewire -->
     @livewireScripts
-
-    <!-- Script personalizado para gráficos -->
     @stack('scripts')
 </body>
 

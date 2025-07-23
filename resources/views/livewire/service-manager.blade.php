@@ -1,6 +1,4 @@
-<div class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-6 transition-all duration-300 ease-in-out">
-
-    <!-- Notificación Toast -->
+<div> <!-- Notificación Toast -->
     @if (session()->has('notify'))
         <div class="fixed top-4 right-4 z-50 max-w-sm w-full transition-all duration-500" wire:poll.5s="$refresh">
             <div

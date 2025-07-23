@@ -12,7 +12,6 @@ class PrediccionProducto extends Component
     public $anio;
     public $mesInicio;
     public $meses = 6;
-    public $menuAbierto = true;
 
     public $predicciones = [];
     public $errorApi = null;
@@ -25,7 +24,21 @@ class PrediccionProducto extends Component
     public $selectedProductName = '';
     public $productoSeleccionado = false;
 
-    protected $listeners = ['toggleMenu' => 'updateMenuState'];
+    protected $rules = [
+        'productoId' => 'required|integer|min:1',
+        'anio' => 'required|integer|min:2000|max:2100',
+        'mesInicio' => 'required|integer|min:1|max:12',
+        'meses' => 'required|integer|min:1|max:24'
+    ];
+
+    protected $messages = [
+        'productoId.required' => 'Debes seleccionar un producto de la lista',
+        'anio.required' => 'El año es requerido',
+        'mesInicio.required' => 'El mes inicial es requerido',
+        'meses.required' => 'La cantidad de meses es requerida',
+        'min' => 'El valor mínimo es :min',
+        'max' => 'El valor máximo es :max'
+    ];
 
     public function searchProduct()
     {
@@ -62,27 +75,6 @@ class PrediccionProducto extends Component
         }
     }
 
-    public function updateMenuState()
-    {
-        $this->menuAbierto = !$this->menuAbierto;
-    }
-
-    protected $rules = [
-        'productoId' => 'required|integer|min:1',
-        'anio' => 'required|integer|min:2000|max:2100',
-        'mesInicio' => 'required|integer|min:1|max:12',
-        'meses' => 'required|integer|min:1|max:24'
-    ];
-
-    protected $messages = [
-        'productoId.required' => 'Debes seleccionar un producto de la lista',
-        'anio.required' => 'El año es requerido',
-        'mesInicio.required' => 'El mes inicial es requerido',
-        'meses.required' => 'La cantidad de meses es requerida',
-        'min' => 'El valor mínimo es :min',
-        'max' => 'El valor máximo es :max'
-    ];
-
     public function obtenerPrediccion()
     {
         // Validación adicional antes de la validación formal
@@ -115,9 +107,7 @@ class PrediccionProducto extends Component
         } finally {
             $this->cargando = false;
         }
-        $this->dispatch('prediccionesActualizadas', $this->predicciones);
     }
-
     protected function formatearPredicciones(array $data): array
     {
         $formateado = [];
@@ -134,17 +124,18 @@ class PrediccionProducto extends Component
                 }
 
                 $formateado[] = [
-                    'mes' => $fecha ? $fecha->format('Y-m') : $item['ds'],
+                    'mes' => $fecha ? $fecha->format('F Y') : $item['ds'], // Formato más legible
                     'demanda' => number_format($currentValue, 2),
-                    'tendencia' => $tendencia !== null ? round($tendencia, 2) : null
+                    'tendencia' => $tendencia !== null ? round($tendencia, 2) : null,
+                    'valor_numerico' => $currentValue // Para el gráfico
                 ];
 
                 $prevValue = $currentValue;
             }
         }
+
         return $formateado;
     }
-
 
     public function clearProduct()
     {
@@ -156,6 +147,7 @@ class PrediccionProducto extends Component
             'showlist'
         ]);
     }
+
     public function resetForm()
     {
         $this->reset([
@@ -171,6 +163,21 @@ class PrediccionProducto extends Component
             'errorApi'
         ]);
     }
+
+    public function generateChart()
+    {
+        // Asegúrate de que hay predicciones para mostrar
+        if (empty($this->predicciones)) {
+            return;
+        }
+
+        // Dispara el evento con los datos formateados correctamente
+        $this->dispatch(
+            'prediccionesActualizadas',
+            predicciones: $this->predicciones
+        );
+    }
+
     public function render()
     {
         return view('livewire.prediccion-producto')->layout('layouts.app');

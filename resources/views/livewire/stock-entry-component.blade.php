@@ -1,4 +1,4 @@
-<div class="{{ $menuAbierto ? 'ml-60' : 'ml-0' }} mt-16 max-w-7xl mx-auto p-6 transition-all duration-300 ease-in-out">
+<div>
     <div class="container mx-auto space-y-6">
         <!-- Notificación -->
         @if (session()->has('message'))

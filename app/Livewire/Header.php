@@ -9,7 +9,7 @@ use Livewire\Component;
 
 class Header extends Component
 {
-    public $menuAbierto = true;
+
     public $currentRoute = null;
     public $hasPending = false;
     public $lowStockProducts = [];
@@ -17,10 +17,11 @@ class Header extends Component
     public $isPendienteFacturacion = true;
     public $hasVerificacionPendiente = false;
     public $lastNotificationCount = 0;
-    public $initialCheckDone = false; // Nueva propiedad
+    public $initialCheckDone = false;
+    public $hasNotifications = false; // Añadimos esta propiedad
+
 
     protected $listeners = [
-        'toggleMenu' => 'updateMenuState',
         'checkPendingSales',
         'saleCreated',
         'checkLowStock',
@@ -29,8 +30,10 @@ class Header extends Component
     public function checkVerificacionesPendientes()
     {
         $this->hasVerificacionPendiente = Proforma::where('status', 'esperando_verificacion')->exists();
+        $this->updateHasNotifications();
         $this->triggerNotificationIfNeeded();
     }
+
     private function triggerNotificationIfNeeded()
     {
         // Solo verificar después de la carga inicial
@@ -46,16 +49,12 @@ class Header extends Component
         session(['last_notification_count' => $currentCount]);
     }
 
-
-
     public function mount()
     {
         $this->currentRoute = request()->route()->getName();
         $this->checkPendingSales();
         $this->checkLowStock();
         $this->checkVerificacionesPendientes();
-
-        // Marcar que la verificación inicial ya se hizo
         $this->initialCheckDone = true;
     }
 
@@ -68,7 +67,13 @@ class Header extends Component
         return $count;
     }
 
-
+    // Nueva función para actualizar el estado de notificaciones
+    private function updateHasNotifications()
+    {
+        $this->hasNotifications = $this->hasPending ||
+            ($this->lowStockProducts && count($this->lowStockProducts) > 0) ||
+            $this->hasVerificacionPendiente;
+    }
 
     public function toggleModal()
     {
@@ -80,10 +85,6 @@ class Header extends Component
         $this->dispatch('toggleMenu');
     }
 
-    public function updateMenuState()
-    {
-        $this->menuAbierto = !$this->menuAbierto;
-    }
 
     public function checkLowStock()
     {
@@ -91,6 +92,7 @@ class Header extends Component
             ->where('status', 'published')
             ->get();
 
+        $this->updateHasNotifications();
         $this->triggerNotificationIfNeeded();
     }
 
@@ -100,9 +102,9 @@ class Header extends Component
             ->where('estado_sale', '!=', 'anulado_sale')
             ->exists();
 
+        $this->updateHasNotifications();
         $this->triggerNotificationIfNeeded();
     }
-
 
     public function saleCreated(Sale $sale)
     {
@@ -122,8 +124,13 @@ class Header extends Component
 
     public function render()
     {
+        $this->updateHasNotifications();
+
         return view('livewire.header', [
-            'hasNotifications' => $this->hasPending || $this->lowStockProducts->isNotEmpty() || $this->hasVerificacionPendiente,
-        ])->layout('layouts.app');
+            'hasNotifications' => $this->hasNotifications,
+            'hasPending' => $this->hasPending,
+            'lowStockProducts' => $this->lowStockProducts,
+            'hasVerificacionPendiente' => $this->hasVerificacionPendiente,
+        ]);
     }
 }

@@ -12,24 +12,16 @@ use Livewire\Component;
 
 class DashboardChart extends Component
 {
-    public $menuAbierto = true;
     public $fechaInicio;
     public $fechaFin;
     public $marcaSeleccionada = '';
     public $categoriaSeleccionada = '';
-    public $filtrosAplicados = false; // Nuevo estado para controlar cuando se aplican los filtros
-
-
-    protected $listeners = ['toggleMenu' => 'updateMenuState'];
+    public $filtrosAplicados = false;
 
     public function mount()
     {
         $this->establecerFechasPorDefecto();
-    }
-
-    public function updateMenuState()
-    {
-        $this->menuAbierto = !$this->menuAbierto;
+        $this->emitirDatosGraficos(); // Emitir al cargar la vista por primera vez
     }
 
     public function aplicarFiltros()
@@ -39,15 +31,13 @@ class DashboardChart extends Component
             return;
         }
 
-        $this->filtrosAplicados = true; // Marcar que los filtros han sido aplicados
+        $this->filtrosAplicados = true;
         $this->emitirDatosGraficos();
     }
 
     public function updated($property)
     {
         if (in_array($property, ['fechaInicio', 'fechaFin', 'marcaSeleccionada', 'categoriaSeleccionada'])) {
-            // No emitir datos automáticamente, esperar al botón aplicar
-            // Solo marcamos que los filtros no están aplicados
             $this->filtrosAplicados = false;
         }
     }
@@ -59,6 +49,12 @@ class DashboardChart extends Component
         $this->emitirDatosGraficos();
     }
 
+    private function establecerFechasPorDefecto()
+    {
+        $this->fechaFin = Carbon::now()->format('Y-m-d');
+        $this->fechaInicio = Carbon::now()->subDays(30)->format('Y-m-d');
+        $this->filtrosAplicados = true;
+    }
 
     private function aplicarFiltrosProducto($query)
     {
@@ -76,7 +72,6 @@ class DashboardChart extends Component
     private function obtenerKPIs()
     {
         $ventas = Sale::whereBetween('sale_date', [$this->fechaInicio, $this->fechaFin]);
-
         $totalVentas = $ventas->sum('total');
         $totalTransacciones = $ventas->count();
         $ventaPromedio = $totalTransacciones > 0 ? $totalVentas / $totalTransacciones : 0;
@@ -85,7 +80,6 @@ class DashboardChart extends Component
             ->whereBetween('sales.sale_date', [$this->fechaInicio, $this->fechaFin]);
 
         $detalles = $this->aplicarFiltrosProducto($detalles);
-
         $totalProductos = $detalles->sum('quantity');
 
         return compact('totalVentas', 'totalTransacciones', 'ventaPromedio', 'totalProductos');
@@ -109,8 +103,7 @@ class DashboardChart extends Component
 
         $query = $this->aplicarFiltrosProducto($query);
 
-        return $query
-            ->groupBy('brands.name')
+        return $query->groupBy('brands.name')
             ->pluck('total', 'marca')
             ->toArray();
     }
@@ -123,54 +116,40 @@ class DashboardChart extends Component
 
         $query = $this->aplicarFiltrosProducto($query);
 
-        return $query
-            ->groupBy('categories.name')
+        return $query->groupBy('categories.name')
             ->pluck('total', 'categoria')
             ->toArray();
     }
 
     protected function emitirDatosGraficos()
     {
-        $ventas = $this->obtenerVentasPorFecha();
-        $marcas = $this->obtenerIngresosPorMarca();
-        $categorias = $this->obtenerIngresosPorCategoria();
+        try {
+            $ventas = $this->obtenerVentasPorFecha();
+            $marcas = $this->obtenerIngresosPorMarca();
+            $categorias = $this->obtenerIngresosPorCategoria();
 
-        $this->dispatch(
-            'chartsUpdated',
-            ventas: $ventas,
-            marcas: $marcas,
-            categorias: $categorias
-        )->to(static::class); // Envía el evento solo a este componente
+            $this->dispatch(
+                'chartsUpdated',
+                ventas: $ventas,
+                marcas: $marcas,
+                categorias: $categorias
+            );
+        } catch (\Exception $e) {
+            report($e);
+            $this->dispatch('chartsUpdated', ventas: [], marcas: [], categorias: []);
+        }
     }
-
-    private function establecerFechasPorDefecto()
-    {
-        $this->fechaFin = Carbon::now()->format('Y-m-d');
-        $this->fechaInicio = Carbon::now()->subDays(30)->format('Y-m-d');
-        $this->filtrosAplicados = true; // Considerar los valores por defecto como aplicados
-    }
-
-    // ... (resto de métodos permanecen iguales)
 
     public function render()
     {
-        try {
-            $kpis = $this->obtenerKPIs();
+        $kpis = $this->obtenerKPIs();
 
-            $marcas = Brand::orderBy('name')->get();
-            $categorias = Category::orderBy('name')->get();
+        $marcas = Brand::orderBy('name')->get();
+        $categorias = Category::orderBy('name')->get();
 
-            return view('livewire.dashboard-chart', array_merge($kpis, [
-                'ventasPorFecha' => $this->filtrosAplicados ? $this->obtenerVentasPorFecha() : [],
-                'ingresosPorMarca' => $this->filtrosAplicados ? $this->obtenerIngresosPorMarca() : [],
-                'ingresosPorCategoria' => $this->filtrosAplicados ? $this->obtenerIngresosPorCategoria() : [],
-                'marcas' => $marcas,
-                'categorias' => $categorias,
-                'filtrosAplicados' => $this->filtrosAplicados,
-            ]));
-        } catch (\Exception $e) {
-            report($e);
-            return view('livewire.dashboard-chart')->withErrors(['error' => 'Hubo un problema al generar el dashboard.']);
-        }
+        return view('livewire.dashboard-chart', array_merge($kpis, [
+            'marcas' => $marcas,
+            'categorias' => $categorias,
+        ]));
     }
 }

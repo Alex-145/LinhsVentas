@@ -7,7 +7,9 @@ use Livewire\Component;
 class NavigationMenudos extends Component
 {
     public $menuAbierto = true; // Estado del menú lateral
-    public $dropdowns = [
+
+    // Estados de los dropdowns para persistencia
+    public $dropdownStates = [
         'inventario' => false,
         'ventas' => false,
         'contactos' => false,
@@ -15,46 +17,51 @@ class NavigationMenudos extends Component
     ];
 
     protected $listeners = ['toggleMenu' => 'updateMenuState'];
-    public function updateMenuState()
-    {
-        $this->menuAbierto = !$this->menuAbierto;
-    }
-    public function navegar($ruta)
-    {
-        // Guardar estados en la sesión
-        session()->put('menuAbierto', $this->menuAbierto);
-        session()->put('dropdowns', $this->dropdowns);
-        return redirect()->route($ruta);
-    }
-
-    public function navegarinicio($ruta)
-    {
-        return redirect()->to($ruta);
-    }
-
-    public function navegarsales($ruta)
-    {
-        // Guardar el estado del filtro en la sesión
-        session()->put('isPendienteFacturacion', false);
-
-        // Redirigir a la ruta con los parámetros adicionales
-        return redirect()->route($ruta, ['isPendienteFacturacion' => false]);
-    }
-
-    public function toggleDropdown($key)
-    {
-        $this->dropdowns[$key] = !$this->dropdowns[$key];
-    }
 
     public function mount()
     {
         // Recuperar estados desde la sesión
         $this->menuAbierto = session('menuAbierto', $this->menuAbierto);
-        $this->dropdowns = session('dropdowns', $this->dropdowns);
+
+        // Cargar estados de los dropdowns desde la sesión
+        $savedDropdowns = session('dropdowns', []);
+        foreach ($this->dropdownStates as $key => $value) {
+            $this->dropdownStates[$key] = $savedDropdowns[$key] ?? $value;
+        }
+    }
+
+    public function updateMenuState()
+    {
+        $this->menuAbierto = !$this->menuAbierto;
+        $this->saveStates();
+    }
+
+    public function toggleDropdown($key)
+    {
+        $this->dropdownStates[$key] = !$this->dropdownStates[$key];
+        $this->saveStates();
+    }
+
+    public function navegarsales($ruta)
+    {
+        $this->saveStates();
+        session()->put('isPendienteFacturacion', false);
+        return redirect()->route($ruta, ['isPendienteFacturacion' => false]);
+    }
+
+    private function saveStates()
+    {
+        // Guardar estados en la sesión
+        session()->put('menuAbierto', $this->menuAbierto);
+        session()->put('dropdowns', $this->dropdownStates);
     }
 
     public function render()
     {
-        return view('livewire.navigation-menudos')->layout('layout.app');
+        // Pasar los estados a las vistas Alpine.js
+        return view('livewire.navigation-menudos', [
+            'dropdownStates' => $this->dropdownStates,
+            'menuAbierto' => $this->menuAbierto,
+        ])->layout('layout.app');
     }
 }
