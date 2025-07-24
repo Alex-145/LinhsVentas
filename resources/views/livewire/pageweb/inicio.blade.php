@@ -18,8 +18,11 @@
             <div class="container mx-auto px-4 h-full flex flex-col lg:flex-row items-center relative z-20">
                 <div class="lg:w-1/2 text-center lg:text-left lg:pl-12">
                     <h1 class="text-5xl font-extrabold leading-tight mb-6 tracking-tight drop-shadow-lg">
-                        Bienvenido a <span class="text-yellow-400">LINHSLLANTAS</span>
+                        Bienvenido a
+                        <img src="{{ asset('storage/pageweb/logonuevosinfondo.png') }}" alt="LINHSLLANTAS"
+                            class="inline-block h-24 align-middle"> <!-- 6rem (96px) -->
                     </h1>
+
                     <p
                         class="text-xl text-blue-100 font-light mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0 drop-shadow">
                         Te ofrecemos una amplia gama de llantas y productos especializados para el mantenimiento de tu

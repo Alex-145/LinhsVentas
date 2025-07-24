@@ -9,7 +9,8 @@
                     Tu satisfacción es nuestra prioridad.
                 </p>
                 <div class="mt-4">
-                    <img src="{{ asset('storage/pageweb/logologin1.png') }}" alt="Logo de Linhs Llantas" class="w-32">
+                    <img src="{{ asset('storage/pageweb/logonuevosinfondo.png') }}" alt="Logo de Linhs Llantas"
+                        class="w-32">
                 </div>
             </div>
 
