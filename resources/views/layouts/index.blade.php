@@ -7,7 +7,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Título de la pestaña -->
-    <title>Linhs Llantas | Tu tienda de confianza</title>
+    <title>Linhs Llantas | Llantas y Servicios Automotrices en Challhuahuacho, Apurímac</title>
+
+    <meta name="description"
+        content="Linhs Llantas - Venta de llantas para autos, camionetas y vehículos 4x4 en Challhuahuacho, Apurímac. Servicios de instalación, alineamiento, balanceo, cambio de aceite y revisión mecánica. Atención por Lino Huamanvilca. Trabajamos con marcas como Triangle, Maxxis, Bridgestone, Dunlop, Falken, GTRadial, Comforser, Onyx y Farroad.">
+    <meta name="keywords"
+        content="llantas Challhuahuacho, llantas Apurímac, Lino Huamanvilca, Linhs Llantas, venta de llantas mina Las Bambas, aceites para autos, baterías, cámaras, alineamiento, balanceo, cambio de aceite, revisión mecánica, Triangle, Maxxis, Bridgestone, Dunlop, Falken, GTRadial, Comforser, Onyx, Farroad, camionetas, 4x4, autos, Saico, Cotabambas, Espinar">
+    <meta name="author" content="Linhs Llantas">
+    <meta name="robots" content="index, follow">
 
     <!-- Favicon (ícono de la pestaña) -->
     <link rel="icon" href="{{ asset('storage/pageweb/logopeque.png') }}" type="image/png">
@@ -16,8 +23,11 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Estilos de Livewire y Vite -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Estilos compilados -->
+    <link rel="stylesheet" href="{{ asset('build/assets/app-czh60oOY.css') }}">
+    <script src="{{ asset('build/assets/app-TCBhWwx8.js') }}" defer></script>
+
+    <!-- Estilos de Livewire -->
     @livewireStyles
 
     <!-- Ocultar elementos con x-cloak hasta que Alpine.js esté listo -->
@@ -49,8 +59,6 @@
 
     @stack('modals')
     @livewireScripts
-
-    {{-- ✅ Aquí se deben renderizar los scripts que empujas con @push --}}
     @stack('scripts')
 
     <!-- Ícono flotante de WhatsApp -->

@@ -16,8 +16,10 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Assets compilados -->
+    <link rel="stylesheet" href="{{ asset('build/assets/app-czh60oOY.css') }}">
+    <script src="{{ asset('build/assets/app-TCBhWwx8.js') }}" defer></script>
+
     @livewireStyles
 </head>
 
@@ -35,13 +37,10 @@
 
     <x-banner />
 
-    <!-- Menú (Sidebar) controlado por Livewire -->
-    @livewire('navigationmenudos')
+    @livewire('navigation-menudos')
 
-    <!-- Header Livewire (incluye desktop y móvil) -->
     @livewire('header')
 
-    <!-- Contenedor principal -->
     <div :class="menuAbierto && esDesktop ? 'md:ml-64 pt-20' : 'pt-20'" class="transition-all duration-300">
         <main>
             @if (isset($header))
